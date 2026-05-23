@@ -2,915 +2,737 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>ブックノート — 読書メモ交換</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ブックノート — 本の学びを交換する</title>
   <style>
     :root {
-      --primary: #2d6a4f;
-      --primary-light: #52b788;
-      --primary-pale: #d8f3dc;
-      --accent: #e76f51;
-      --bg: #f4f6f3;
-      --card-bg: #ffffff;
+      --bg: #f5f4f0;
+      --card: #ffffff;
+      --primary: #5e35b1;
+      --primary-pale: #ede7f6;
+      --good: #00c853;
+      --bad: #ff1744;
       --text: #1a1a2e;
-      --text-secondary: #6c757d;
-      --border: #e9ecef;
-      --header-h: 56px;
-      --nav-h: 64px;
-      --radius: 16px;
-      --shadow: 0 2px 12px rgba(0,0,0,0.07);
+      --text2: #6b7280;
+      --border: #e5e7eb;
+      --nav-h: 66px;
+      --hdr-h: 52px;
+      --r: 20px;
+      --sh: 0 8px 32px rgba(0,0,0,0.13);
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
       background: var(--bg);
       color: var(--text);
-      -webkit-font-smoothing: antialiased;
-      max-width: 480px;
+      max-width: 430px;
       margin: 0 auto;
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* ===== HEADER ===== */
-    #header {
-      position: fixed;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 480px;
-      height: var(--header-h);
-      background: white;
-      border-bottom: 1px solid var(--border);
-      z-index: 100;
+    #hdr {
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px; height: var(--hdr-h);
+      background: var(--card); border-bottom: 1px solid var(--border);
+      z-index: 200; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 20px;
     }
-    .header-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 100%;
-      padding: 0 16px;
-    }
-    .logo {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--primary);
-      letter-spacing: -0.5px;
-    }
-    .logo span { color: var(--accent); }
-    .user-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--primary-pale);
-      padding: 4px 10px 4px 4px;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-    .user-chip .av {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: white;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 800;
-    }
-    .user-chip span {
-      font-size: 13px; font-weight: 700; color: var(--primary);
-    }
-
-    /* ===== MAIN ===== */
-    #main {
-      margin-top: var(--header-h);
-      margin-bottom: var(--nav-h);
-      min-height: calc(100vh - var(--header-h) - var(--nav-h));
-    }
-    .tab-content { display: none; padding: 12px; }
-    .tab-content.active { display: block; }
+    .logo { font-size: 19px; font-weight: 900; color: var(--primary); letter-spacing: -0.5px; }
+    .logo em { color: #f59e0b; font-style: normal; }
+    .hdr-sub { font-size: 12px; color: var(--text2); }
 
     /* ===== BOTTOM NAV ===== */
-    #bottomNav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%; max-width: 480px;
-      height: var(--nav-h);
-      background: white;
-      border-top: 1px solid var(--border);
-      display: flex;
-      z-index: 100;
-      padding-bottom: env(safe-area-inset-bottom);
+    #nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px; height: var(--nav-h);
+      background: var(--card); border-top: 1px solid var(--border);
+      display: flex; z-index: 200;
     }
-    .nav-btn {
-      flex: 1;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 2px;
-      border: none; background: none; cursor: pointer;
-      color: var(--text-secondary);
-      transition: color 0.2s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .nav-btn.active { color: var(--primary); }
-    .nav-icon { font-size: 22px; line-height: 1; }
-    .nav-label { font-size: 11px; font-weight: 600; }
-    .nav-btn.post-btn { position: relative; }
-    .nav-post-circle {
-      width: 46px; height: 46px;
-      background: var(--primary);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px; color: white; font-weight: 400;
-      box-shadow: 0 4px 14px rgba(45,106,79,0.45);
-      margin-bottom: 2px;
-      line-height: 1;
-    }
-    .nav-post-label { font-size: 11px; font-weight: 600; color: var(--primary); }
-
-    /* ===== FILTER BAR ===== */
-    .filter-bar {
-      display: flex; gap: 6px;
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      padding-bottom: 8px;
-    }
-    .filter-bar::-webkit-scrollbar { display: none; }
-    .filter-chip {
-      padding: 5px 13px;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      font-size: 12px; font-weight: 600;
-      white-space: nowrap; cursor: pointer;
-      background: white; color: var(--text-secondary);
-      font-family: inherit;
-      flex-shrink: 0;
-      -webkit-tap-highlight-color: transparent;
-      transition: all 0.15s;
-    }
-    .filter-chip.active {
-      background: var(--primary); color: white; border-color: var(--primary);
-    }
-
-    /* ===== FEED CARDS ===== */
-    .feed-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 12px;
-      overflow: hidden;
-    }
-    .card-user-row {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 14px 10px;
-    }
-    .user-avatar-sm {
-      width: 34px; height: 34px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
-    }
-    .user-info { flex: 1; min-width: 0; }
-    .user-name { font-size: 13px; font-weight: 700; }
-    .post-date { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
-    .post-tag {
-      font-size: 11px; font-weight: 700;
-      padding: 3px 9px; border-radius: 20px;
-      background: var(--primary-pale); color: var(--primary);
-      flex-shrink: 0;
-    }
-    .mine-badge {
-      font-size: 10px; background: var(--accent); color: white;
-      padding: 1px 6px; border-radius: 8px; font-weight: 700;
-      margin-left: 4px; vertical-align: middle;
-    }
-
-    .card-book-row {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 0 14px 12px;
-    }
-    .book-cover {
-      width: 54px; height: 74px;
-      border-radius: 5px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      box-shadow: 3px 3px 10px rgba(0,0,0,0.18);
-    }
-    .book-info { flex: 1; padding-top: 2px; }
-    .book-title { font-size: 14px; font-weight: 800; line-height: 1.35; margin-bottom: 4px; }
-    .book-author { font-size: 12px; color: var(--text-secondary); }
-
-    .card-memo {
-      padding: 10px 14px 12px;
-      border-top: 1px solid var(--border);
-    }
-    .memo-quote {
-      font-size: 11px; color: var(--primary); font-weight: 700;
-      margin-bottom: 6px; letter-spacing: 0.3px;
-    }
-    .memo-text {
-      font-size: 13px; line-height: 1.75; color: #333;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .memo-text.expanded {
-      display: block;
-    }
-    .read-more-btn {
-      display: inline-block; margin-top: 5px;
-      font-size: 12px; color: var(--primary); font-weight: 600;
-      cursor: pointer; background: none; border: none;
-      padding: 0; font-family: inherit;
-    }
-
-    .card-actions {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 8px 10px 10px;
-      border-top: 1px solid var(--border);
-    }
-    .like-btn {
-      display: flex; align-items: center; gap: 5px;
+    .nb {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      font-size: 10px; font-weight: 700; color: var(--text2);
       background: none; border: none; cursor: pointer;
-      color: var(--text-secondary); font-size: 13px; font-weight: 600;
-      padding: 6px 10px; border-radius: 20px;
-      transition: all 0.15s;
-      -webkit-tap-highlight-color: transparent;
-      font-family: inherit;
+      transition: color 0.2s; padding-bottom: 4px;
     }
-    .like-btn.liked { color: #e63946; }
-    .like-icon { font-size: 17px; transition: transform 0.2s; }
-    .like-btn.liked .like-icon { animation: heartPop 0.3s ease; }
-    .share-btn {
-      display: flex; align-items: center; gap: 4px;
-      background: none; border: none; cursor: pointer;
-      color: var(--text-secondary); font-size: 12px; font-weight: 600;
-      padding: 6px 10px; border-radius: 20px;
-      font-family: inherit;
-      -webkit-tap-highlight-color: transparent;
+    .nb .ni { font-size: 24px; }
+    .nb.on { color: var(--primary); }
+
+    /* ===== MAIN ===== */
+    #main { margin-top: var(--hdr-h); margin-bottom: var(--nav-h); }
+
+    .tab { display: none; }
+    .tab.on { display: block; }
+
+    /* ===== HOME ===== */
+    #tHome {
+      height: calc(100vh - var(--hdr-h) - var(--nav-h));
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center; padding: 16px 16px 8px;
+    }
+    #tHome.on { display: flex; }
+
+    .stack {
+      position: relative; width: 100%; max-width: 390px;
+      height: calc(100vh - var(--hdr-h) - var(--nav-h) - 120px);
+      max-height: 520px;
     }
 
-    /* ===== SHELF ===== */
-    .shelf-header { text-align: center; padding: 20px 0 10px; }
-    .shelf-title { font-size: 18px; font-weight: 800; }
-    .shelf-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-    .shelf-empty {
-      text-align: center; padding: 60px 24px;
-      color: var(--text-secondary);
+    .scard {
+      position: absolute; inset: 0;
+      background: var(--card); border-radius: var(--r);
+      box-shadow: var(--sh); overflow: hidden;
+      touch-action: none; user-select: none; cursor: grab;
+      will-change: transform;
     }
-    .shelf-empty-icon { font-size: 52px; margin-bottom: 14px; }
-    .shelf-empty-text { font-size: 14px; line-height: 1.7; }
-    .shelf-add-btn {
-      margin-top: 20px;
-      display: inline-block;
-      background: var(--primary); color: white;
-      padding: 11px 26px; border-radius: 24px;
-      font-size: 14px; font-weight: 700;
-      cursor: pointer; border: none; font-family: inherit;
+    .scard:active { cursor: grabbing; }
+    .scard.back1 { transform: translateY(10px) scale(0.96); z-index: 1; pointer-events: none; }
+    .scard.back2 { transform: translateY(20px) scale(0.92); z-index: 0; pointer-events: none; }
+    .scard.top   { z-index: 10; }
+
+    .scard-img {
+      width: 100%; height: 48%; object-fit: cover; display: block; flex-shrink: 0;
     }
-    .shelf-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      margin-top: 6px;
+    .scard-img-ph {
+      width: 100%; height: 48%;
+      display: flex; align-items: center; justify-content: center; font-size: 72px;
     }
-    .shelf-card {
-      background: white; border-radius: 12px;
-      box-shadow: var(--shadow); padding: 12px; cursor: pointer;
+    .scard-user {
+      position: absolute; top: 12px; left: 12px;
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
+      padding: 5px 12px 5px 5px; border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
     }
-    .shelf-cover {
-      width: 100%; height: 80px;
-      border-radius: 8px;
+    .scard-av {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .scard-uname { font-size: 13px; font-weight: 700; }
+    .scard-tag {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(94,53,177,0.88); color: white;
+      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px;
+    }
+    .scard-body { padding: 14px 18px 16px; overflow: hidden; }
+    .scard-btitle {
+      font-size: 17px; font-weight: 900; line-height: 1.3; margin-bottom: 3px;
+      display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .scard-bauthor { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+    .scard-memo {
+      font-size: 13px; line-height: 1.65; color: var(--text);
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    /* vote overlay */
+    .vov {
+      position: absolute; inset: 0; border-radius: var(--r);
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px; margin-bottom: 8px;
+      opacity: 0; pointer-events: none; transition: opacity 0.08s;
     }
-    .shelf-book-title {
-      font-size: 13px; font-weight: 800; line-height: 1.3; margin-bottom: 2px;
-      overflow: hidden; display: -webkit-box;
-      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    }
-    .shelf-book-author { font-size: 11px; color: var(--text-secondary); }
-    .shelf-book-tag {
-      display: inline-block; margin-top: 6px;
-      font-size: 10px; font-weight: 700;
-      padding: 2px 7px; border-radius: 10px;
-      background: var(--primary-pale); color: var(--primary);
+    .vov.good { background: rgba(0,200,83,0.28); }
+    .vov.bad  { background: rgba(255,23,68,0.28); }
+    .vlabel {
+      font-size: 36px; font-weight: 900; color: white;
+      border: 4px solid white; padding: 8px 18px; border-radius: 12px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3); letter-spacing: 1px;
     }
 
-    /* ===== MODAL ===== */
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.55); z-index: 200;
-      display: flex; align-items: flex-end; justify-content: center;
-    }
-    .modal-overlay.hidden { display: none; }
-    .modal-sheet {
-      background: white; width: 100%; max-width: 480px;
-      border-radius: 22px 22px 0 0;
-      max-height: 92vh; overflow-y: auto;
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
-    }
-    .modal-handle {
-      width: 36px; height: 4px; background: #ddd;
-      border-radius: 2px; margin: 12px auto 0;
-    }
-    .modal-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-title { font-size: 17px; font-weight: 800; }
-    .modal-close {
-      background: none; border: none; font-size: 20px;
-      cursor: pointer; color: var(--text-secondary); padding: 4px;
-    }
-    .modal-body { padding: 16px; }
-
-    .form-group { margin-bottom: 16px; }
-    .form-label {
-      display: block; font-size: 12px; font-weight: 800;
-      color: var(--text-secondary); margin-bottom: 6px;
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    .form-label .req { color: var(--accent); }
-    .form-input, .form-textarea {
-      width: 100%; padding: 11px 13px;
-      border: 1.5px solid var(--border); border-radius: 10px;
-      font-size: 15px; font-family: inherit; outline: none;
-      transition: border-color 0.2s; color: var(--text);
-      background: white;
-    }
-    .form-input:focus, .form-textarea:focus { border-color: var(--primary); }
-    .form-textarea { resize: none; min-height: 130px; line-height: 1.6; }
-
-    .tag-selector { display: flex; flex-wrap: wrap; gap: 6px; }
-    .tag-chip {
-      padding: 5px 13px; border-radius: 16px;
-      border: 1.5px solid var(--border);
-      font-size: 13px; cursor: pointer;
-      background: white; font-family: inherit;
-      transition: all 0.15s; color: var(--text-secondary);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .tag-chip.selected {
-      background: var(--primary); color: white; border-color: var(--primary);
-    }
-
-    .submit-btn {
-      width: 100%; padding: 14px;
-      background: var(--primary); color: white;
-      border: none; border-radius: 12px;
-      font-size: 16px; font-weight: 800;
-      cursor: pointer; font-family: inherit; margin-top: 8px;
-      transition: opacity 0.2s;
-    }
-    .submit-btn:active { opacity: 0.8; }
-
-    /* ===== DETAIL MODAL ===== */
-    .detail-book-row {
-      display: flex; align-items: center; gap: 14px;
-      padding: 16px; border-bottom: 1px solid var(--border);
-    }
-    .detail-cover {
-      width: 60px; height: 82px; border-radius: 6px;
+    /* action buttons */
+    .abtns {
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
-      box-shadow: 3px 3px 10px rgba(0,0,0,0.18);
-      flex-shrink: 0;
+      gap: 24px; margin-top: 20px; flex-shrink: 0;
     }
-    .detail-book-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
-    .detail-book-author { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
-    .detail-meta { display: flex; gap: 6px; flex-wrap: wrap; }
-    .detail-memo {
-      padding: 16px; font-size: 14px; line-height: 1.85;
-      color: #333; white-space: pre-wrap;
+    .abtn {
+      width: 66px; height: 66px; border-radius: 50%; border: none;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; cursor: pointer;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.14);
+      transition: transform 0.12s, box-shadow 0.12s;
     }
-    .detail-actions {
-      padding: 8px 16px 16px;
-      display: flex; gap: 8px;
-    }
-    .detail-delete-btn {
-      flex: 1; padding: 11px;
-      background: #fff5f5; color: #e63946;
-      border: 1.5px solid #ffc9c9; border-radius: 10px;
-      font-size: 14px; font-weight: 700; cursor: pointer;
-      font-family: inherit;
-    }
+    .abtn:active { transform: scale(0.91); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+    .abtn.bad  { background: white; color: var(--bad); font-size: 28px; }
+    .abtn.skip { width: 50px; height: 50px; background: white; color: var(--text2); font-size: 18px; }
+    .abtn.good { background: var(--primary); color: white; font-size: 28px; }
 
-    /* ===== TOAST ===== */
-    .toast {
-      position: fixed;
+    /* animations */
+    @keyframes fRight { to { transform: translateX(130%) rotate(22deg); opacity: 0; } }
+    @keyframes fLeft  { to { transform: translateX(-130%) rotate(-22deg); opacity: 0; } }
+    .fr { animation: fRight 0.32s ease-in forwards; }
+    .fl { animation: fLeft  0.32s ease-in forwards; }
+
+    /* empty */
+    .empty {
+      text-align: center; padding: 48px 20px;
+    }
+    .empty .ei { font-size: 64px; margin-bottom: 16px; }
+    .empty h3  { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .empty p   { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+    /* ===== RANKING ===== */
+    #tRank { padding: 16px; }
+    .stitle { font-size: 20px; font-weight: 900; padding: 8px 4px 0; margin-bottom: 16px; }
+
+    .rcard {
+      background: var(--card); border-radius: 16px; padding: 16px;
+      margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .rnum { font-size: 22px; font-weight: 900; color: var(--primary); min-width: 36px; text-align: center; padding-top: 2px; }
+    .rnum.g { color: #f59e0b; }
+    .rnum.s { color: #9ca3af; }
+    .rnum.b { color: #d97706; }
+    .rcov {
+      width: 56px; height: 74px; border-radius: 8px;
+      object-fit: cover; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+    }
+    .rinfo { flex: 1; min-width: 0; }
+    .rtitle { font-size: 15px; font-weight: 800; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rauthor { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+    .rmemo {
+      font-size: 13px; color: var(--text); line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .rmeta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .ruser { font-size: 12px; color: var(--text2); }
+    .rlikes { font-size: 13px; font-weight: 800; color: var(--primary); }
+
+    /* ===== MY ===== */
+    #tMy { padding: 16px; }
+    .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mcard {
+      background: var(--card); border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+      transition: transform 0.13s;
+    }
+    .mcard:active { transform: scale(0.96); }
+    .mcov {
+      width: 100%; height: 120px; object-fit: cover;
+      display: flex; align-items: center; justify-content: center; font-size: 40px;
+    }
+    .mbody { padding: 10px 12px 14px; }
+    .mbtitle { font-size: 13px; font-weight: 700; margin-bottom: 4px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .mlikes { font-size: 12px; font-weight: 700; color: var(--primary); }
+
+    /* ===== FAB ===== */
+    #fab {
+      position: fixed; right: calc(50% - 195px);
       bottom: calc(var(--nav-h) + 16px);
-      left: 50%; transform: translateX(-50%) translateY(20px);
-      background: #1a1a2e; color: white;
-      padding: 10px 22px; border-radius: 24px;
-      font-size: 14px; font-weight: 600;
-      opacity: 0; transition: all 0.3s;
-      z-index: 300; white-space: nowrap; pointer-events: none;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: var(--primary); color: white; border: none;
+      font-size: 30px; font-weight: 300; cursor: pointer; z-index: 180;
+      box-shadow: 0 4px 22px rgba(94,53,177,0.45);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.13s;
     }
-    .toast.show {
-      opacity: 1; transform: translateX(-50%) translateY(0);
+    #fab:active { transform: scale(0.90); }
+
+    /* ===== MODALS ===== */
+    .mover {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.52);
+      z-index: 300; display: flex; align-items: flex-end; justify-content: center;
+    }
+    .mover.h { display: none; }
+    .msheet {
+      background: var(--card); border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 430px; padding: 20px 20px 44px;
+      max-height: 92vh; overflow-y: auto;
+    }
+    .mhandle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+    .mtitle { font-size: 20px; font-weight: 900; margin-bottom: 18px; }
+
+    /* photo upload */
+    .parea {
+      width: 100%; height: 150px; border: 2px dashed var(--border); border-radius: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; cursor: pointer; margin-bottom: 16px; overflow: hidden; position: relative;
+      transition: border-color 0.2s;
+    }
+    .parea:hover { border-color: var(--primary); }
+    .parea.hp { border: none; }
+    .parea img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .parea-lbl { font-size: 13px; color: var(--text2); }
+    .premov {
+      position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
+      background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%;
+      font-size: 13px; cursor: pointer; z-index: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #pInput { display: none; }
+
+    /* form */
+    .flbl { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 6px; display: block; }
+    .finp {
+      width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; font-size: 15px; font-family: inherit;
+      color: var(--text); background: var(--bg); margin-bottom: 14px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .finp:focus { border-color: var(--primary); }
+    textarea.finp { height: 110px; resize: none; line-height: 1.6; }
+
+    .trow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .tchip {
+      padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+      font-size: 13px; font-weight: 600; background: var(--bg); color: var(--text2);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .tchip.on { background: var(--primary); border-color: var(--primary); color: white; }
+
+    .sbtn {
+      width: 100%; background: var(--primary); color: white; border: none;
+      border-radius: 16px; padding: 16px; font-size: 16px; font-weight: 900;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .sbtn:active { opacity: 0.82; }
+    .ccbtn {
+      width: 100%; background: none; border: none; padding: 12px;
+      font-size: 14px; color: var(--text2); cursor: pointer; margin-top: 4px;
     }
 
-    /* ===== ANIMATIONS ===== */
-    @keyframes heartPop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.5); }
-      100% { transform: scale(1); }
+    /* detail */
+    .dimg { width: 100%; height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; }
+    .diph { width: 100%; height: 160px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 16px; }
+    .dbtitle { font-size: 20px; font-weight: 900; margin-bottom: 4px; }
+    .dbauthor { font-size: 14px; color: var(--text2); margin-bottom: 14px; }
+    .dmemo { font-size: 15px; line-height: 1.7; margin-bottom: 24px; }
+    .dbtns { display: flex; gap: 12px; }
+    .ddbtn {
+      flex: 1; padding: 14px; border: 1.5px solid #fee2e2; border-radius: 12px;
+      background: white; color: #ef4444; font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .dclbtn {
+      flex: 1; padding: 14px; border: none; border-radius: 12px;
+      background: #f3f4f6; color: var(--text2); font-size: 14px; font-weight: 700; cursor: pointer;
     }
 
-    /* ===== EMPTY FEED ===== */
-    .empty-state {
-      text-align: center; padding: 60px 20px;
-      color: var(--text-secondary);
+    /* toast */
+    #toast {
+      position: fixed; bottom: calc(var(--nav-h) + 76px); left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #1a1a2e; color: white; padding: 11px 22px; border-radius: 24px;
+      font-size: 14px; font-weight: 600; opacity: 0;
+      transition: opacity 0.28s, transform 0.28s;
+      pointer-events: none; white-space: nowrap; z-index: 500;
     }
-    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
-    .empty-state-text { font-size: 14px; line-height: 1.7; }
+    #toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
-<div id="app">
-
-  <!-- ===== HEADER ===== -->
-  <header id="header">
-    <div class="header-inner">
-      <div class="logo">📚 ブック<span>ノート</span></div>
-      <div class="user-chip">
-        <div class="av" id="userAv">TK</div>
-        <span id="userName">TK</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- ===== MAIN ===== -->
-  <main id="main">
-
-    <!-- フィード -->
-    <section id="tabFeed" class="tab-content active">
-      <div class="filter-bar" id="filterBar"></div>
-      <div id="feedList"></div>
-    </section>
-
-    <!-- 本棚 -->
-    <section id="tabShelf" class="tab-content">
-      <div class="shelf-header">
-        <div class="shelf-title">📖 TKの本棚</div>
-        <div class="shelf-subtitle" id="shelfSubtitle">0冊</div>
-      </div>
-      <div id="shelfContent"></div>
-    </section>
-
-  </main>
-
-  <!-- ===== BOTTOM NAV ===== -->
-  <nav id="bottomNav">
-    <button class="nav-btn active" id="navFeed" onclick="switchTab('feed')">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-label">フィード</span>
-    </button>
-    <button class="nav-btn post-btn" onclick="showPostModal()">
-      <div class="nav-post-circle">＋</div>
-      <span class="nav-post-label">投稿</span>
-    </button>
-    <button class="nav-btn" id="navShelf" onclick="switchTab('shelf')">
-      <span class="nav-icon">📖</span>
-      <span class="nav-label">本棚</span>
-    </button>
-  </nav>
-
+<div id="hdr">
+  <div class="logo">📚 ブックノート<em>.</em></div>
+  <div class="hdr-sub">本の学びを交換する</div>
 </div>
 
-<!-- ===== POST MODAL ===== -->
-<div class="modal-overlay hidden" id="postModal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-header">
-      <div class="modal-title">📝 読書メモを投稿</div>
-      <button class="modal-close" onclick="hidePostModal()">✕</button>
+<div id="main">
+  <!-- HOME -->
+  <div class="tab" id="tHome">
+    <div class="stack" id="stack"></div>
+    <div class="abtns" id="abtns">
+      <button class="abtn bad"  onclick="vote('bad')">✕</button>
+      <button class="abtn skip" onclick="skipCard()">↩</button>
+      <button class="abtn good" onclick="vote('good')">❤️</button>
     </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">本のタイトル <span class="req">*</span></label>
-        <input class="form-input" id="fTitle" type="text" placeholder="例：ゼロ・トゥ・ワン">
-      </div>
-      <div class="form-group">
-        <label class="form-label">著者名</label>
-        <input class="form-input" id="fAuthor" type="text" placeholder="例：ピーター・ティール">
-      </div>
-      <div class="form-group">
-        <label class="form-label">カテゴリ</label>
-        <div class="tag-selector" id="tagSelector"></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">学び・気づき <span class="req">*</span></label>
-        <textarea class="form-textarea" id="fMemo" placeholder="この本から得た気づき・印象に残った言葉・実践したいことを書いてみよう&#10;&#10;「量より質」ではなく「質を上げるために量をこなす」という考え方に目から鱗が落ちた…"></textarea>
-      </div>
-      <button class="submit-btn" onclick="submitPost()">投稿する 🚀</button>
-    </div>
+  </div>
+
+  <!-- RANKING -->
+  <div class="tab" id="tRank">
+    <div class="stitle">🏆 ランキング</div>
+    <div id="rankList"></div>
+  </div>
+
+  <!-- MY -->
+  <div class="tab" id="tMy">
+    <div class="stitle">📖 マイポスト</div>
+    <div id="myContent"></div>
   </div>
 </div>
 
-<!-- ===== DETAIL MODAL ===== -->
-<div class="modal-overlay hidden" id="detailModal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-header">
-      <div class="modal-title" id="detailTitle">詳細</div>
-      <button class="modal-close" onclick="hideDetailModal()">✕</button>
+<nav id="nav">
+  <button class="nb on" id="nbHome" onclick="sw('Home')">
+    <span class="ni">🏠</span><span>ホーム</span>
+  </button>
+  <button class="nb" id="nbRank" onclick="sw('Rank')">
+    <span class="ni">🏆</span><span>ランキング</span>
+  </button>
+  <button class="nb" id="nbMy" onclick="sw('My')">
+    <span class="ni">📖</span><span>マイポスト</span>
+  </button>
+</nav>
+
+<button id="fab" onclick="openPost()">＋</button>
+
+<!-- POST MODAL -->
+<div class="mover h" id="postMod">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mtitle">📚 読書メモを投稿</div>
+    <div class="parea" id="pArea" onclick="document.getElementById('pInput').click()">
+      <div style="font-size:32px">📷</div>
+      <div class="parea-lbl">本の写真を追加（任意）</div>
     </div>
-    <div id="detailBody"></div>
+    <input type="file" id="pInput" accept="image/*" onchange="handlePic(this)">
+    <label class="flbl">本のタイトル <span style="color:var(--bad)">*</span></label>
+    <input class="finp" id="fT" placeholder="例：嫌われる勇気" type="text">
+    <label class="flbl">著者</label>
+    <input class="finp" id="fA" placeholder="例：岸見一郎" type="text">
+    <label class="flbl">カテゴリ</label>
+    <div class="trow" id="tagRow"></div>
+    <label class="flbl">学び・日記 <span style="color:var(--bad)">*</span></label>
+    <textarea class="finp" id="fM" placeholder="この本から得た気づき、感想、今日の学びを書こう..."></textarea>
+    <button class="sbtn" onclick="submitPost()">投稿する ✨</button>
+    <button class="ccbtn" onclick="closePost()">キャンセル</button>
   </div>
 </div>
 
-<!-- ===== TOAST ===== -->
-<div class="toast" id="toast"></div>
+<!-- DETAIL MODAL -->
+<div class="mover h" id="detMod">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div id="detBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script>
-// =============================================
-// 定数
-// =============================================
-const TAGS = ['ビジネス', '自己啓発', '哲学', '経済', '心理', '科学', '小説', 'その他'];
+// ─── DATA ───────────────────────────────────────────
+const TAGS = ['ビジネス','自己啓発','哲学','経済','心理','科学','小説','その他'];
 
-const COVER_COLORS = [
-  ['#2d6a4f', '#b7e4c7'],
-  ['#457b9d', '#a8dadc'],
-  ['#6d4c7d', '#e9d8fd'],
-  ['#e76f51', '#ffddd2'],
-  ['#f4a261', '#fef3c7'],
-  ['#2b6cb0', '#bee3f8'],
-  ['#c77dff', '#f0e6ff'],
-  ['#386641', '#c7efcf'],
+const GRADS = [
+  ['#667eea','#764ba2'],['#f093fb','#f5576c'],['#4facfe','#00f2fe'],
+  ['#43e97b','#38f9d7'],['#fa709a','#fee140'],['#a18cd1','#fbc2eb'],
+  ['#ffecd2','#fcb69f'],['#ff9a9e','#fecfef'],['#a1c4fd','#c2e9fb'],
+  ['#fddb92','#d1fdff'],['#96fbc4','#f9f586'],['#fccb90','#d57eeb'],
 ];
-
-function getCoverColors(str) {
+function grad(title) {
   let h = 0;
-  for (const c of String(str)) h = (h << 5) - h + c.charCodeAt(0);
-  return COVER_COLORS[Math.abs(h) % COVER_COLORS.length];
+  for (let c of title) h = ((h << 5) - h) + c.charCodeAt(0);
+  return GRADS[Math.abs(h) % GRADS.length];
 }
 
-// =============================================
-// デモデータ（8投稿 × 5ユーザー）
-// =============================================
 const DEMO = [
-  {
-    id: 'd1',
-    user: { name: '葵', emoji: '🌿', bg: '#d8f3dc' },
-    book: { title: 'ゼロ・トゥ・ワン', author: 'ピーター・ティール' },
-    tag: 'ビジネス',
-    memo: '「競争は敗者のゲーム」というフレーズが刺さった。スタートアップが目指すべきは独占であり、1から10ではなく0から1を創ること。競合を見て焦っている暇があれば、誰も見ていない空白地帯を探せという話。\n\n自分のやっていることがコモディティになっていないか、毎月問い直したい。',
-    date: '2026-05-15', likes: 23
-  },
-  {
-    id: 'd2',
-    user: { name: '健人', emoji: '⚡', bg: '#ffddd2' },
-    book: { title: '思考の整理学', author: '外山滋比古' },
-    tag: '自己啓発',
-    memo: 'グライダーと飛行機の比喩が秀逸。外から動力をもらわないと飛べないグライダー人間ではなく、自分で飛べる飛行機型になれという話。学校教育がグライダー型を量産してきた、という指摘はぐさっときた。\n\n「忘れることを恐れるな。忘れることが思考を軽くする」も印象的。何でも記録しようとする自分の癖を見直すきっかけになった。',
-    date: '2026-05-14', likes: 18
-  },
-  {
-    id: 'd3',
-    user: { name: '美沙', emoji: '🌸', bg: '#f0e6ff' },
-    book: { title: 'エッセンシャル思考', author: 'グレッグ・マキューン' },
-    tag: '自己啓発',
-    memo: '「やらないことを決める」より「やることを徹底的に絞る」という考え方の転換が一番効いた。全部やろうとすると全部が中途半端になる。本当に重要な1割に全力を注ぐことが最大のインパクトを生む。\n\n今週から、毎朝「今日の最重要事項は1つだけ」と決めてから仕事を始めている。',
-    date: '2026-05-13', likes: 31
-  },
-  {
-    id: 'd4',
-    user: { name: '涼太', emoji: '🔥', bg: '#fef3c7' },
-    book: { title: 'SHOE DOG', author: 'フィル・ナイト' },
-    tag: 'ビジネス',
-    memo: 'Nikeの創業物語。倒産寸前から世界最大スポーツブランドになるまでの軌跡が圧巻。銀行との攻防、日本のサプライヤーとの交渉、社内の人間ドラマ。\n\nフィル・ナイトが「狂気的に走り続けることが使命だと信じていた」と書いているシーンが一番刺さった。成功者の自伝って美化されがちだけど、これは泥臭さが全部書いてある。起業する人は必読。',
-    date: '2026-05-12', likes: 15
-  },
-  {
-    id: 'd5',
-    user: { name: '花', emoji: '✨', bg: '#a8dadc' },
-    book: { title: 'ファクトフルネス', author: 'ハンス・ロスリング' },
-    tag: '経済',
-    memo: '世界についての直感がほぼ全部間違っていることを、データで叩きつけられた。「世界は悪化し続けている」という思い込み、実は現実を歪めた解釈をしているだけだった。\n\n「ネガティブ本能」と「直線本能」が自分に刺さった。悲観的なニュースばかり目につくのは、そういう本能があるからだと分かると少し楽になる。',
-    date: '2026-05-11', likes: 27
-  },
-  {
-    id: 'd6',
-    user: { name: '葵', emoji: '🌿', bg: '#d8f3dc' },
-    book: { title: '嫌われる勇気', author: '岸見一郎・古賀史健' },
-    tag: '哲学',
-    memo: 'アドラー心理学の入門書。「人の悩みは全て対人関係の悩みである」という命題から始まり、課題の分離・承認欲求からの解放へと展開する。\n\n「他者の期待を満たすために生きてはいけない」という言葉、頭では分かっていたけど腑に落ちたのは初めてかも。自分の課題と他人の課題を分ける実践が地味に難しくて面白い。',
-    date: '2026-05-09', likes: 42
-  },
-  {
-    id: 'd7',
-    user: { name: '健人', emoji: '⚡', bg: '#ffddd2' },
-    book: { title: '１分で話せ', author: '伊藤羊一' },
-    tag: 'ビジネス',
-    memo: 'プレゼンは相手の頭の中にYESを作ること、という定義から入る実践的な本。「人は論理では動かない、感情で動いて論理で正当化する」というのが刺さった。\n\n上司への提案が通らないのは、自分が論理ばかり並べていたからかも。感情への働きかけをもっと意識する。',
-    date: '2026-05-08', likes: 19
-  },
-  {
-    id: 'd8',
-    user: { name: '美沙', emoji: '🌸', bg: '#f0e6ff' },
-    book: { title: 'アウトプット大全', author: '樺沢紫苑' },
-    tag: '自己啓発',
-    memo: 'インプット3：アウトプット7が理想比率、というのが一番の収穫。本ばかり読んで「分かった気」になるのが一番やばいパターンだと自覚した。\n\n読んだら必ずメモ→SNSでシェア→人に話す、の3ステップを実践中。このノートを書くのもその一環。書くことで本当に理解しているかが分かる。',
-    date: '2026-05-06', likes: 33
-  },
+  { id:'d1', user:{name:'葵',emoji:'🌿',bg:'#d8f3dc'}, book:{title:'ゼロ・トゥ・ワン',author:'ピーター・ティール'}, tag:'ビジネス', photo:null,
+    memo:'「競争は敗者のゲーム」というフレーズが刺さった。スタートアップが目指すべきは独占であり、1から10ではなく0から1を創ること。\n\n自分のやっていることがコモディティになっていないか、毎月問い直したい。', date:'2026-05-15', likes:47 },
+  { id:'d2', user:{name:'健人',emoji:'⚡',bg:'#ffddd2'}, book:{title:'思考の整理学',author:'外山滋比古'}, tag:'自己啓発', photo:null,
+    memo:'グライダーと飛行機の比喩が秀逸。外から動力をもらわないと飛べないグライダー人間ではなく、自分で飛べる飛行機型になれという話。\n\n「忘れることを恐れるな。忘れることが思考を軽くする」も印象的だった。', date:'2026-05-14', likes:39 },
+  { id:'d3', user:{name:'美沙',emoji:'🌸',bg:'#f0e6ff'}, book:{title:'エッセンシャル思考',author:'グレッグ・マキューン'}, tag:'自己啓発', photo:null,
+    memo:'「やらないことを決める」より「やることを徹底的に絞る」という考え方の転換が一番効いた。本当に重要な1割に全力を注ぐことが最大のインパクトを生む。\n\n今週から毎朝「今日の最重要事項は1つだけ」と決めてから仕事を始めている。', date:'2026-05-13', likes:62 },
+  { id:'d4', user:{name:'涼太',emoji:'🔥',bg:'#fef3c7'}, book:{title:'SHOE DOG',author:'フィル・ナイト'}, tag:'ビジネス', photo:null,
+    memo:'Nikeの創業物語。倒産寸前から世界最大スポーツブランドになるまでの軌跡が圧巻。フィル・ナイトが「狂気的に走り続けることが使命だと信じていた」と書いているシーンが一番刺さった。\n\n起業する人は必読。', date:'2026-05-12', likes:55 },
+  { id:'d5', user:{name:'花',emoji:'✨',bg:'#a8dadc'}, book:{title:'FACTFULNESS',author:'ハンス・ロスリング'}, tag:'経済', photo:null,
+    memo:'世界についての直感がほぼ全部間違っていることを、データで叩きつけられた。「ネガティブ本能」と「直線本能」が自分に刺さった。\n\n悲観的なニュースばかり目につくのは、そういう本能があるからだと分かると少し楽になる。', date:'2026-05-11', likes:33 },
+  { id:'d6', user:{name:'葵',emoji:'🌿',bg:'#d8f3dc'}, book:{title:'嫌われる勇気',author:'岸見一郎・古賀史健'}, tag:'哲学', photo:null,
+    memo:'「他者の期待を満たすために生きてはいけない」という言葉に初めて腑に落ちた。課題の分離を実践すると、驚くほど心が軽くなる。\n\n頭で分かることと心で分かることの違いを実感した一冊。', date:'2026-05-09', likes:71 },
+  { id:'d7', user:{name:'健人',emoji:'⚡',bg:'#ffddd2'}, book:{title:'１分で話せ',author:'伊藤羊一'}, tag:'ビジネス', photo:null,
+    memo:'プレゼンは相手の頭の中にYESを作ること。「人は論理では動かない、感情で動いて論理で正当化する」というのが刺さった。\n\n上司への提案が通らないのは、論理ばかり並べていたから。', date:'2026-05-08', likes:28 },
+  { id:'d8', user:{name:'美沙',emoji:'🌸',bg:'#f0e6ff'}, book:{title:'アウトプット大全',author:'樺沢紫苑'}, tag:'自己啓発', photo:null,
+    memo:'インプット3:アウトプット7が理想比率。本ばかり読んで「分かった気」になるのが一番やばいパターンだと自覚した。\n\nこのノートを書くのもその一環。書くことで本当に理解しているかが分かる。', date:'2026-05-06', likes:44 },
 ];
 
-// =============================================
-// 状態
-// =============================================
-let currentTab   = 'feed';
-let currentFilter = 'すべて';
-let selectedTag  = '';
-let likedIds     = JSON.parse(localStorage.getItem('bn_liked') || '[]');
-let userNotes    = JSON.parse(localStorage.getItem('bn_notes') || '[]');
-let detailNoteId = null;
+// ─── STATE ──────────────────────────────────────────
+let userNotes = JSON.parse(localStorage.getItem('bn_notes') || '[]');
+let votes     = JSON.parse(localStorage.getItem('bn_votes') || '{}');
+let curTab    = 'Home';
+let selTag    = '';
+let picData   = null;
 
-// =============================================
-// タブ切り替え
-// =============================================
-function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  const tabEl = document.getElementById('tab' + cap(tab));
-  const navEl = document.getElementById('nav' + cap(tab));
-  if (tabEl) tabEl.classList.add('active');
-  if (navEl) navEl.classList.add('active');
-  if (tab === 'feed') renderFeed();
-  if (tab === 'shelf') renderShelf();
+// ─── TABS ────────────────────────────────────────────
+function sw(tab) {
+  curTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  document.getElementById('t'+tab).classList.add('on');
+  document.getElementById('nb'+tab).classList.add('on');
+  if (tab==='Home') renderHome();
+  if (tab==='Rank') renderRank();
+  if (tab==='My')   renderMy();
 }
 
-function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-// =============================================
-// フィード
-// =============================================
-function getAllNotes() {
-  const myNotes = userNotes.map(n => ({ ...n, isOwn: true }));
-  const demos   = DEMO.map(n => ({ ...n, isOwn: false }));
-  return [...myNotes, ...demos].sort((a, b) => b.date.localeCompare(a.date));
+// ─── HOME ────────────────────────────────────────────
+function allPosts() {
+  return [...userNotes, ...DEMO].sort((a,b) => b.date.localeCompare(a.date));
 }
 
-function renderFeed() {
-  // フィルターバー
-  const filters = ['すべて', ...TAGS];
-  document.getElementById('filterBar').innerHTML = filters.map(f =>
-    `<button class="filter-chip${currentFilter === f ? ' active' : ''}" onclick="setFilter('${f}')">${f}</button>`
-  ).join('');
+function queue() {
+  const seen = Object.keys(votes);
+  const all  = allPosts();
+  const uns  = all.filter(p => !seen.includes(p.id));
+  return uns.length ? uns : all;
+}
 
-  // ノート一覧
-  const notes = getAllNotes().filter(n => currentFilter === 'すべて' || n.tag === currentFilter);
-  const el = document.getElementById('feedList');
+function renderHome() {
+  const st  = document.getElementById('stack');
+  const btn = document.getElementById('abtns');
+  const q   = queue();
 
-  if (notes.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">このカテゴリにはまだ投稿がありません。<br>最初の一件を投稿してみよう！</div></div>`;
+  if (!q.length) {
+    st.innerHTML = `<div class="empty"><div class="ei">📚</div><h3>まだ投稿がありません</h3><p>最初の読書メモを投稿してみよう！</p></div>`;
+    btn.style.display = 'none'; return;
+  }
+  btn.style.display = 'flex';
+  st.innerHTML = '';
+  const show = q.slice(0, 3);
+  for (let i = show.length - 1; i >= 0; i--) {
+    const el = buildCard(show[i]);
+    if (i === show.length - 1) el.classList.add('back2');
+    else if (i === show.length - 2) el.classList.add('back1');
+    else el.classList.add('top');
+    st.appendChild(el);
+  }
+  initSwipe(st.querySelector('.top'), q[0]);
+}
+
+function buildCard(p) {
+  const [g1,g2] = grad(p.book.title);
+  const d = document.createElement('div');
+  d.className = 'scard';
+  d.dataset.id = p.id;
+  d.innerHTML = `
+    ${p.photo
+      ? `<img class="scard-img" src="${p.photo}">`
+      : `<div class="scard-img-ph" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
+    <div class="scard-user">
+      <div class="scard-av" style="background:${p.user.bg}">${p.user.emoji}</div>
+      <span class="scard-uname">${esc(p.user.name)}</span>
+    </div>
+    <span class="scard-tag">${esc(p.tag||'その他')}</span>
+    <div class="scard-body">
+      <div class="scard-btitle">『${esc(p.book.title)}』</div>
+      <div class="scard-bauthor">${esc(p.book.author||'')}</div>
+      <div class="scard-memo">${esc(p.memo)}</div>
+    </div>
+    <div class="vov good" id="vg-${p.id}"><span class="vlabel">GOOD ✨</span></div>
+    <div class="vov bad"  id="vb-${p.id}"><span class="vlabel">PASS 👎</span></div>`;
+  return d;
+}
+
+function initSwipe(card, post) {
+  if (!card || !post) return;
+  let sx, sy, drag = false;
+  const THR = 85;
+
+  const start = e => {
+    drag = true; card.style.transition = 'none';
+    const pt = e.touches ? e.touches[0] : e;
+    sx = pt.clientX; sy = pt.clientY;
+  };
+  const move = e => {
+    if (!drag) return; e.preventDefault();
+    const pt = e.touches ? e.touches[0] : e;
+    const dx = pt.clientX - sx, dy = pt.clientY - sy;
+    card.style.transform = `translateX(${dx}px) translateY(${dy * 0.25}px) rotate(${dx * 0.07}deg)`;
+    const vg = document.getElementById(`vg-${post.id}`);
+    const vb = document.getElementById(`vb-${post.id}`);
+    if (dx > 30)  { if(vg) vg.style.opacity = Math.min(dx/THR,1); if(vb) vb.style.opacity = 0; }
+    else if (dx < -30) { if(vb) vb.style.opacity = Math.min(-dx/THR,1); if(vg) vg.style.opacity = 0; }
+    else { if(vg) vg.style.opacity=0; if(vb) vb.style.opacity=0; }
+  };
+  const end = e => {
+    if (!drag) return; drag = false;
+    const pt = e.changedTouches ? e.changedTouches[0] : e;
+    const dx = pt.clientX - sx;
+    card.style.transition = 'transform 0.28s ease';
+    if (dx > THR) {
+      card.classList.add('fr');
+      setTimeout(() => { doVote(post.id,'good'); renderHome(); }, 320);
+    } else if (dx < -THR) {
+      card.classList.add('fl');
+      setTimeout(() => { doVote(post.id,'bad'); renderHome(); }, 320);
+    } else {
+      card.style.transform = '';
+      const vg = document.getElementById(`vg-${post.id}`);
+      const vb = document.getElementById(`vb-${post.id}`);
+      if(vg) vg.style.opacity=0; if(vb) vb.style.opacity=0;
+    }
+  };
+  card.addEventListener('mousedown', start);
+  card.addEventListener('touchstart', start, {passive:false});
+  window.addEventListener('mousemove', move);
+  card.addEventListener('touchmove', move, {passive:false});
+  window.addEventListener('mouseup', end);
+  card.addEventListener('touchend', end);
+}
+
+function vote(type) {
+  const q = queue();
+  if (!q.length) return;
+  const p = q[0];
+  const card = document.querySelector(`.scard.top`);
+  if (!card) return;
+  const ov = document.getElementById(type==='good' ? `vg-${p.id}` : `vb-${p.id}`);
+  if (ov) ov.style.opacity = 1;
+  card.style.transition = 'transform 0.28s ease';
+  card.classList.add(type==='good' ? 'fr' : 'fl');
+  setTimeout(() => { doVote(p.id, type); renderHome(); }, 320);
+}
+
+function skipCard() {
+  const q = queue();
+  if (!q.length) return;
+  doVote(q[0].id, 'skip');
+  renderHome();
+}
+
+function doVote(id, type) {
+  votes[id] = type;
+  localStorage.setItem('bn_votes', JSON.stringify(votes));
+  if (type === 'good') {
+    const d = DEMO.find(x => x.id===id); if(d) d.likes++;
+    const u = userNotes.find(x => x.id===id); if(u) { u.likes=(u.likes||0)+1; localStorage.setItem('bn_notes',JSON.stringify(userNotes)); }
+  }
+  if (type==='good') toast('❤️ GOOD！');
+  if (type==='bad')  toast('👋 パス');
+}
+
+// ─── RANKING ─────────────────────────────────────────
+function renderRank() {
+  const all = allPosts().sort((a,b)=>(b.likes||0)-(a.likes||0));
+  const el  = document.getElementById('rankList');
+  if (!all.length) { el.innerHTML='<p style="text-align:center;color:#6b7280;padding:40px">まだ投稿がありません</p>'; return; }
+  el.innerHTML = all.map((p,i) => {
+    const [g1,g2] = grad(p.book.title);
+    const nc = i===0?'g':i===1?'s':i===2?'b':'';
+    const nl = i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+    return `<div class="rcard">
+      <div class="rnum ${nc}">${nl}</div>
+      ${p.photo
+        ? `<img class="rcov" src="${p.photo}">`
+        : `<div class="rcov" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
+      <div class="rinfo">
+        <div class="rtitle">『${esc(p.book.title)}』</div>
+        <div class="rauthor">${esc(p.book.author||'')}</div>
+        <div class="rmemo">${esc(p.memo)}</div>
+        <div class="rmeta">
+          <span class="ruser">${p.user.emoji} ${esc(p.user.name)}</span>
+          <span class="rlikes">❤️ ${p.likes||0}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── MY POSTS ────────────────────────────────────────
+function renderMy() {
+  const el = document.getElementById('myContent');
+  if (!userNotes.length) {
+    el.innerHTML=`<div class="empty"><div class="ei">📚</div><h3>まだ投稿がありません</h3><p>読んだ本の学びを投稿してみよう！</p></div>`;
     return;
   }
-  el.innerHTML = notes.map(n => buildCard(n)).join('');
-}
-
-function buildCard(n) {
-  const [bg] = getCoverColors(n.book.title);
-  const isLiked = likedIds.includes(n.id);
-  const likeCount = n.likes + (isLiked ? 1 : 0);
-  const longMemo = n.memo.length > 100;
-
-  return `
-    <div class="feed-card" id="card-${n.id}">
-      <div class="card-user-row">
-        <div class="user-avatar-sm" style="background:${n.user.bg}">${n.user.emoji}</div>
-        <div class="user-info">
-          <div class="user-name">${esc(n.user.name)}${n.isOwn ? '<span class="mine-badge">自分</span>' : ''}</div>
-          <div class="post-date">${fmtDate(n.date)}</div>
-        </div>
-        <span class="post-tag">${esc(n.tag || 'その他')}</span>
+  el.innerHTML=`<div class="mgrid">${userNotes.map(p=>{
+    const [g1,g2]=grad(p.book.title);
+    return `<div class="mcard" onclick="openDetail('${p.id}')">
+      ${p.photo
+        ? `<img class="mcov" src="${p.photo}">`
+        : `<div class="mcov" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
+      <div class="mbody">
+        <div class="mbtitle">${esc(p.book.title)}</div>
+        <div class="mlikes">❤️ ${p.likes||0}</div>
       </div>
-      <div class="card-book-row">
-        <div class="book-cover" style="background:${bg}">📖</div>
-        <div class="book-info">
-          <div class="book-title">${esc(n.book.title)}</div>
-          <div class="book-author">${esc(n.book.author || '著者不明')}</div>
-        </div>
-      </div>
-      <div class="card-memo">
-        <div class="memo-quote">💬 読書メモ</div>
-        <div class="memo-text" id="mt-${n.id}">${esc(n.memo)}</div>
-        ${longMemo ? `<button class="read-more-btn" id="rmb-${n.id}" onclick="toggleMemo('${n.id}')">もっと見る ▼</button>` : ''}
-      </div>
-      <div class="card-actions">
-        <button class="like-btn${isLiked ? ' liked' : ''}" id="like-${n.id}" onclick="toggleLike('${n.id}', ${n.likes})">
-          <span class="like-icon">${isLiked ? '❤️' : '🤍'}</span>
-          <span id="lc-${n.id}">${likeCount}</span>
-        </button>
-        <button class="share-btn" onclick="shareNote('${n.id}')">↗ シェア</button>
-      </div>
-    </div>
-  `;
-}
-
-function setFilter(f) {
-  currentFilter = f;
-  renderFeed();
-}
-
-function toggleMemo(id) {
-  const mt  = document.getElementById(`mt-${id}`);
-  const btn = document.getElementById(`rmb-${id}`);
-  const exp = mt.classList.toggle('expanded');
-  btn.textContent = exp ? '閉じる ▲' : 'もっと見る ▼';
-}
-
-function toggleLike(id, _base) {
-  const btn  = document.getElementById(`like-${id}`);
-  const icon = btn.querySelector('.like-icon');
-  const cnt  = document.getElementById(`lc-${id}`);
-  const cur  = parseInt(cnt.textContent);
-
-  if (likedIds.includes(id)) {
-    likedIds = likedIds.filter(i => i !== id);
-    btn.classList.remove('liked');
-    icon.textContent = '🤍';
-    cnt.textContent = cur - 1;
-  } else {
-    likedIds.push(id);
-    btn.classList.add('liked');
-    icon.textContent = '❤️';
-    cnt.textContent = cur + 1;
-  }
-  localStorage.setItem('bn_liked', JSON.stringify(likedIds));
-}
-
-function shareNote(id) {
-  const note = [...DEMO, ...userNotes].find(n => n.id === id);
-  if (!note) return;
-  const text = `📚「${note.book.title}」より\n\n${note.memo.slice(0, 120)}${note.memo.length > 120 ? '…' : ''}\n\n#ブックノート`;
-  if (navigator.share) {
-    navigator.share({ text }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(text).then(() => showToast('📋 クリップボードにコピーしました'));
-  }
-}
-
-// =============================================
-// 本棚
-// =============================================
-function renderShelf() {
-  const notes = userNotes;
-  document.getElementById('shelfSubtitle').textContent = `${notes.length}冊`;
-  const el = document.getElementById('shelfContent');
-
-  if (notes.length === 0) {
-    el.innerHTML = `
-      <div class="shelf-empty">
-        <div class="shelf-empty-icon">📚</div>
-        <div class="shelf-empty-text">まだ本棚に本がありません。<br>最初の読書メモを投稿してみよう！</div>
-        <button class="shelf-add-btn" onclick="showPostModal()">＋ 投稿する</button>
-      </div>`;
-    return;
-  }
-
-  el.innerHTML = `
-    <div class="shelf-grid">
-      ${notes.map(n => {
-        const [bg] = getCoverColors(n.book.title);
-        return `
-          <div class="shelf-card" onclick="showDetail('${n.id}')">
-            <div class="shelf-cover" style="background:${bg}">📖</div>
-            <div class="shelf-book-title">${esc(n.book.title)}</div>
-            <div class="shelf-book-author">${esc(n.book.author || '著者不明')}</div>
-            <span class="shelf-book-tag">${esc(n.tag || 'その他')}</span>
-          </div>`;
-      }).join('')}
     </div>`;
+  }).join('')}</div>`;
 }
 
-function showDetail(id) {
-  const note = userNotes.find(n => n.id === id);
-  if (!note) return;
-  detailNoteId = id;
-  const [bg] = getCoverColors(note.book.title);
-  document.getElementById('detailTitle').textContent = '📖 ' + note.book.title;
-  document.getElementById('detailBody').innerHTML = `
-    <div class="detail-book-row">
-      <div class="detail-cover" style="background:${bg}">📖</div>
-      <div>
-        <div class="detail-book-title">${esc(note.book.title)}</div>
-        <div class="detail-book-author">${esc(note.book.author || '著者不明')}</div>
-        <div class="detail-meta">
-          <span class="shelf-book-tag">${esc(note.tag || 'その他')}</span>
-          <span style="font-size:11px;color:var(--text-secondary);padding-top:3px;">${fmtDate(note.date)}</span>
-        </div>
-      </div>
-    </div>
-    <div class="detail-memo">${esc(note.memo)}</div>
-    <div class="detail-actions">
-      <button class="detail-delete-btn" onclick="deleteNote('${id}')">🗑 削除する</button>
+function openDetail(id) {
+  const p = userNotes.find(n=>n.id===id); if(!p) return;
+  const [g1,g2]=grad(p.book.title);
+  document.getElementById('detBody').innerHTML=`
+    ${p.photo
+      ? `<img class="dimg" src="${p.photo}">`
+      : `<div class="diph" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
+    <div class="dbtitle">『${esc(p.book.title)}』</div>
+    <div class="dbauthor">${esc(p.book.author||'')}</div>
+    <div class="dmemo">${esc(p.memo)}</div>
+    <div class="dbtns">
+      <button class="ddbtn" onclick="delNote('${id}')">🗑 削除</button>
+      <button class="dclbtn" onclick="closeDet()">閉じる</button>
     </div>`;
-  document.getElementById('detailModal').classList.remove('hidden');
+  document.getElementById('detMod').classList.remove('h');
 }
 
-function deleteNote(id) {
-  if (!confirm('このメモを削除しますか？')) return;
-  userNotes = userNotes.filter(n => n.id !== id);
+function delNote(id) {
+  if (!confirm('削除しますか？')) return;
+  userNotes = userNotes.filter(n=>n.id!==id);
   localStorage.setItem('bn_notes', JSON.stringify(userNotes));
-  hideDetailModal();
-  renderShelf();
-  showToast('🗑 削除しました');
+  closeDet(); renderMy(); toast('🗑 削除しました');
 }
+function closeDet() { document.getElementById('detMod').classList.add('h'); }
 
-function hideDetailModal() {
-  document.getElementById('detailModal').classList.add('hidden');
-  detailNoteId = null;
+// ─── POST MODAL ──────────────────────────────────────
+function openPost() {
+  selTag=''; picData=null;
+  document.getElementById('fT').value='';
+  document.getElementById('fA').value='';
+  document.getElementById('fM').value='';
+  const pa=document.getElementById('pArea');
+  pa.classList.remove('hp');
+  pa.innerHTML=`<div style="font-size:32px">📷</div><div class="parea-lbl">本の写真を追加（任意）</div>`;
+  document.getElementById('tagRow').innerHTML=TAGS.map(t=>`<button class="tchip" onclick="pickTag('${t}',this)">${t}</button>`).join('');
+  document.getElementById('postMod').classList.remove('h');
 }
+function closePost() { document.getElementById('postMod').classList.add('h'); }
 
-// =============================================
-// 投稿モーダル
-// =============================================
-function showPostModal() {
-  selectedTag = '';
-  document.getElementById('fTitle').value  = '';
-  document.getElementById('fAuthor').value = '';
-  document.getElementById('fMemo').value   = '';
-  document.getElementById('tagSelector').innerHTML = TAGS.map(t =>
-    `<button class="tag-chip" onclick="pickTag('${t}',this)">${t}</button>`
-  ).join('');
-  document.getElementById('postModal').classList.remove('hidden');
-  setTimeout(() => document.getElementById('fTitle').focus(), 100);
+function handlePic(input) {
+  if (!input.files?.[0]) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    picData=e.target.result;
+    const pa=document.getElementById('pArea');
+    pa.classList.add('hp');
+    pa.innerHTML=`<img src="${picData}"><button class="premov" onclick="rmPic(event)">✕</button>`;
+  };
+  r.readAsDataURL(input.files[0]);
 }
-
-function hidePostModal() {
-  document.getElementById('postModal').classList.add('hidden');
+function rmPic(e) {
+  e.stopPropagation(); picData=null;
+  const pa=document.getElementById('pArea');
+  pa.classList.remove('hp');
+  pa.innerHTML=`<div style="font-size:32px">📷</div><div class="parea-lbl">本の写真を追加（任意）</div>`;
 }
-
-function pickTag(tag, el) {
-  selectedTag = tag;
-  document.querySelectorAll('#tagSelector .tag-chip').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
+function pickTag(t,el) {
+  selTag=t;
+  document.querySelectorAll('#tagRow .tchip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
 }
 
 function submitPost() {
-  const title  = document.getElementById('fTitle').value.trim();
-  const author = document.getElementById('fAuthor').value.trim();
-  const memo   = document.getElementById('fMemo').value.trim();
-
-  if (!title) { showToast('📚 本のタイトルを入力してください'); return; }
-  if (!memo)  { showToast('💭 学び・気づきを入力してください'); return; }
-
-  const note = {
-    id: 'u' + Date.now(),
-    user: { name: 'TK', emoji: '🚀', bg: '#d8f3dc' },
-    book: { title, author },
-    tag: selectedTag || 'その他',
-    memo,
-    date: new Date().toISOString().split('T')[0],
-    likes: 0,
+  const title=document.getElementById('fT').value.trim();
+  const memo=document.getElementById('fM').value.trim();
+  if (!title) { toast('📚 タイトルを入力してください'); return; }
+  if (!memo)  { toast('💭 学びを入力してください'); return; }
+  const note={
+    id:'u'+Date.now(),
+    user:{name:'あなた',emoji:'🚀',bg:'#d8f3dc'},
+    book:{title, author:document.getElementById('fA').value.trim()},
+    tag:selTag||'その他', photo:picData, memo,
+    date:new Date().toISOString().split('T')[0], likes:0,
   };
-
   userNotes.unshift(note);
-  localStorage.setItem('bn_notes', JSON.stringify(userNotes));
-  hidePostModal();
-  showToast('🎉 投稿しました！');
-  if (currentTab === 'shelf') renderShelf();
-  switchTab('feed');
+  localStorage.setItem('bn_notes',JSON.stringify(userNotes));
+  closePost(); toast('🎉 投稿しました！'); sw('Home');
 }
 
-// =============================================
-// ユーティリティ
-// =============================================
-function fmtDate(d) {
-  const date = new Date(d);
-  const diff = Math.floor((Date.now() - date) / 86400000);
-  if (diff === 0) return '今日';
-  if (diff === 1) return '昨日';
-  if (diff < 7)  return `${diff}日前`;
-  return `${date.getMonth()+1}/${date.getDate()}`;
-}
-
+// ─── UTILS ───────────────────────────────────────────
 function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/\n/g,'<br>');
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/\n/g,'<br>');
+}
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2400);
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2600);
-}
-
-// =============================================
-// 初期化
-// =============================================
-renderFeed();
+// ─── INIT ────────────────────────────────────────────
+sw('Home');
 </script>
 </body>
 </html>
