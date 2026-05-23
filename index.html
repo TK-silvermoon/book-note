@@ -3,22 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ブックノート — 本の学びを交換する</title>
+  <title>booknote — 本の学びを交換する</title>
   <style>
     :root {
-      --bg: #f5f4f0;
-      --card: #ffffff;
-      --primary: #5e35b1;
-      --primary-pale: #ede7f6;
-      --good: #00c853;
-      --bad: #ff1744;
-      --text: #1a1a2e;
-      --text2: #6b7280;
-      --border: #e5e7eb;
-      --nav-h: 66px;
-      --hdr-h: 52px;
+      --bg:    #0d0d14;
+      --bg2:   #12121e;
+      --card:  #1a1a28;
+      --card2: #202030;
+      --border: rgba(255,255,255,0.08);
+      --primary: #f0a500;
+      --primary-dim: rgba(240,165,0,0.12);
+      --primary-glow: rgba(240,165,0,0.4);
+      --good:  #22c55e;
+      --good-dim: rgba(34,197,94,0.18);
+      --bad:   #f43f5e;
+      --bad-dim: rgba(244,63,94,0.18);
+      --text:  #ededf5;
+      --text2: #7a7a9a;
+      --text3: #45455e;
+      --nav-h: 70px;
+      --hdr-h: 54px;
       --r: 20px;
-      --sh: 0 8px 32px rgba(0,0,0,0.13);
+      --sh: 0 12px 40px rgba(0,0,0,0.5);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
@@ -32,58 +38,105 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ===== HEADER ===== */
+    /* ── HEADER ── */
     #hdr {
       position: fixed; top: 0; left: 50%; transform: translateX(-50%);
       width: 100%; max-width: 430px; height: var(--hdr-h);
-      background: var(--card); border-bottom: 1px solid var(--border);
+      background: var(--bg); border-bottom: 1px solid var(--border);
       z-index: 200; display: flex; align-items: center;
       justify-content: space-between; padding: 0 20px;
     }
-    .logo { font-size: 19px; font-weight: 900; color: var(--primary); letter-spacing: -0.5px; }
-    .logo em { color: #f59e0b; font-style: normal; }
-    .hdr-sub { font-size: 12px; color: var(--text2); }
+    .logo {
+      font-size: 21px; font-weight: 900; letter-spacing: -1.5px;
+      color: var(--text);
+    }
+    .logo b { color: var(--primary); }
+    .hdr-pill {
+      font-size: 11px; font-weight: 700; color: var(--text3);
+      border: 1px solid var(--border); padding: 4px 12px; border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
 
-    /* ===== BOTTOM NAV ===== */
+    /* ── BOTTOM NAV ── */
     #nav {
       position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
       width: 100%; max-width: 430px; height: var(--nav-h);
-      background: var(--card); border-top: 1px solid var(--border);
+      background: var(--bg); border-top: 1px solid var(--border);
       display: flex; z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom);
     }
     .nb {
       flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 3px;
-      font-size: 10px; font-weight: 700; color: var(--text2);
+      align-items: center; justify-content: center; gap: 5px;
+      font-size: 10px; font-weight: 700; color: var(--text3);
       background: none; border: none; cursor: pointer;
-      transition: color 0.2s; padding-bottom: 4px;
+      transition: color 0.2s; padding-bottom: 2px;
+      letter-spacing: 0.4px;
     }
-    .nb .ni { font-size: 24px; }
+    .nb svg { width: 22px; height: 22px; transition: stroke 0.2s; }
+    .nb svg, .nb svg * {
+      stroke: currentColor; fill: none;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+    }
     .nb.on { color: var(--primary); }
 
-    /* ===== MAIN ===== */
+    /* ── MAIN ── */
     #main { margin-top: var(--hdr-h); margin-bottom: var(--nav-h); }
-
     .tab { display: none; }
     .tab.on { display: block; }
 
-    /* ===== HOME ===== */
+    /* ── HOME: SWAP ── */
     #tHome {
       height: calc(100vh - var(--hdr-h) - var(--nav-h));
       display: none; flex-direction: column;
-      align-items: center; justify-content: center; padding: 16px 16px 8px;
+      align-items: center;
     }
     #tHome.on { display: flex; }
 
+    /* Lock screen */
+    #lockScreen {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100%; padding: 32px 32px; text-align: center;
+    }
+    .lock-ring {
+      width: 88px; height: 88px; border-radius: 28px;
+      background: var(--primary-dim);
+      border: 1px solid rgba(240,165,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 28px;
+    }
+    .lock-ring svg {
+      width: 38px; height: 38px;
+      stroke: var(--primary); fill: none;
+      stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .lock-h { font-size: 24px; font-weight: 900; line-height: 1.4; margin-bottom: 14px; }
+    .lock-p { font-size: 14px; color: var(--text2); line-height: 1.75; margin-bottom: 36px; }
+    .lock-btn {
+      background: var(--primary); color: #0d0d14;
+      border: none; border-radius: 16px;
+      padding: 16px 48px; font-size: 16px; font-weight: 900;
+      cursor: pointer; transition: opacity 0.2s;
+      box-shadow: 0 4px 24px var(--primary-glow);
+    }
+    .lock-btn:active { opacity: 0.82; }
+
+    /* Swipe area */
+    #swipeWrap {
+      display: flex; flex-direction: column;
+      align-items: center; width: 100%; height: 100%;
+      padding: 16px 16px 10px;
+    }
     .stack {
       position: relative; width: 100%; max-width: 390px;
-      height: calc(100vh - var(--hdr-h) - var(--nav-h) - 120px);
-      max-height: 520px;
+      flex: 1; max-height: 520px;
     }
-
     .scard {
       position: absolute; inset: 0;
-      background: var(--card); border-radius: var(--r);
+      background: var(--card);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
       box-shadow: var(--sh); overflow: hidden;
       touch-action: none; user-select: none; cursor: grab;
       will-change: transform;
@@ -93,232 +146,351 @@
     .scard.back2 { transform: translateY(20px) scale(0.92); z-index: 0; pointer-events: none; }
     .scard.top   { z-index: 10; }
 
-    .scard-img {
-      width: 100%; height: 48%; object-fit: cover; display: block; flex-shrink: 0;
-    }
+    .scard-img   { width: 100%; height: 46%; object-fit: cover; display: block; }
     .scard-img-ph {
-      width: 100%; height: 48%;
-      display: flex; align-items: center; justify-content: center; font-size: 72px;
+      width: 100%; height: 46%;
+      display: flex; align-items: center; justify-content: center;
     }
-    .scard-user {
+    .scard-img-ph svg {
+      width: 60px; height: 60px;
+      stroke: rgba(255,255,255,0.15); fill: none;
+      stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .scard-chip-user {
       position: absolute; top: 12px; left: 12px;
       display: flex; align-items: center; gap: 7px;
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(8px);
+      background: rgba(13,13,20,0.75); backdrop-filter: blur(14px);
       padding: 5px 12px 5px 5px; border-radius: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     .scard-av {
-      width: 28px; height: 28px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; font-size: 15px;
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900; color: rgba(255,255,255,0.9);
     }
-    .scard-uname { font-size: 13px; font-weight: 700; }
-    .scard-tag {
+    .scard-uname { font-size: 12px; font-weight: 700; }
+    .scard-chip-tag {
       position: absolute; top: 12px; right: 12px;
-      background: rgba(94,53,177,0.88); color: white;
-      font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px;
+      background: rgba(240,165,0,0.15); color: var(--primary);
+      font-size: 11px; font-weight: 700; padding: 4px 11px;
+      border-radius: 10px; border: 1px solid rgba(240,165,0,0.25);
+      backdrop-filter: blur(14px);
     }
-    .scard-body { padding: 14px 18px 16px; overflow: hidden; }
-    .scard-btitle {
-      font-size: 17px; font-weight: 900; line-height: 1.3; margin-bottom: 3px;
+    .scard-body { padding: 14px 18px 16px; }
+    .scard-title {
+      font-size: 18px; font-weight: 900; line-height: 1.3; margin-bottom: 3px;
       display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .scard-bauthor { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+    .scard-author { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
     .scard-memo {
-      font-size: 13px; line-height: 1.65; color: var(--text);
+      font-size: 13px; line-height: 1.7; color: rgba(237,237,245,0.75);
       display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
     }
 
-    /* vote overlay */
+    /* vote overlays */
     .vov {
       position: absolute; inset: 0; border-radius: var(--r);
       display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.08s;
+      opacity: 0; pointer-events: none; transition: opacity 0.07s;
     }
-    .vov.good { background: rgba(0,200,83,0.28); }
-    .vov.bad  { background: rgba(255,23,68,0.28); }
+    .vov.good { background: var(--good-dim); }
+    .vov.bad  { background: var(--bad-dim); }
     .vlabel {
-      font-size: 36px; font-weight: 900; color: white;
-      border: 4px solid white; padding: 8px 18px; border-radius: 12px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.3); letter-spacing: 1px;
+      font-size: 30px; font-weight: 900; letter-spacing: 3px;
+      border: 3px solid currentColor; padding: 8px 18px; border-radius: 10px;
+      transform: rotate(-12deg);
     }
+    .vov.good .vlabel { color: var(--good); }
+    .vov.bad  .vlabel { color: var(--bad); transform: rotate(12deg); }
 
     /* action buttons */
     .abtns {
       display: flex; align-items: center; justify-content: center;
-      gap: 24px; margin-top: 20px; flex-shrink: 0;
+      gap: 20px; margin-top: 20px; flex-shrink: 0;
     }
     .abtn {
-      width: 66px; height: 66px; border-radius: 50%; border: none;
+      border-radius: 50%; border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 26px; cursor: pointer;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.14);
-      transition: transform 0.12s, box-shadow 0.12s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+      transition: transform 0.12s;
     }
-    .abtn:active { transform: scale(0.91); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-    .abtn.bad  { background: white; color: var(--bad); font-size: 28px; }
-    .abtn.skip { width: 50px; height: 50px; background: white; color: var(--text2); font-size: 18px; }
-    .abtn.good { background: var(--primary); color: white; font-size: 28px; }
+    .abtn:active { transform: scale(0.89); }
+    .abtn svg { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .abtn.bad  {
+      width: 64px; height: 64px;
+      background: var(--card2); border: 1.5px solid var(--border);
+    }
+    .abtn.bad svg  { width: 26px; height: 26px; stroke: var(--bad); stroke-width: 2.2; }
+    .abtn.skip {
+      width: 48px; height: 48px;
+      background: var(--card2); border: 1.5px solid var(--border);
+    }
+    .abtn.skip svg { width: 18px; height: 18px; stroke: var(--text2); stroke-width: 2; }
+    .abtn.good {
+      width: 64px; height: 64px;
+      background: var(--primary);
+      box-shadow: 0 4px 24px var(--primary-glow);
+    }
+    .abtn.good svg { width: 26px; height: 26px; stroke: #0d0d14; stroke-width: 2.4; }
 
-    /* animations */
+    /* swipe animations */
     @keyframes fRight { to { transform: translateX(130%) rotate(22deg); opacity: 0; } }
     @keyframes fLeft  { to { transform: translateX(-130%) rotate(-22deg); opacity: 0; } }
     .fr { animation: fRight 0.32s ease-in forwards; }
     .fl { animation: fLeft  0.32s ease-in forwards; }
 
-    /* empty */
+    /* empty state */
     .empty {
-      text-align: center; padding: 48px 20px;
+      text-align: center; padding: 60px 20px; width: 100%;
     }
-    .empty .ei { font-size: 64px; margin-bottom: 16px; }
-    .empty h3  { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
-    .empty p   { font-size: 14px; color: var(--text2); line-height: 1.6; }
+    .empty-ico {
+      width: 64px; height: 64px; margin: 0 auto 16px; opacity: 0.18;
+    }
+    .empty-ico svg {
+      width: 64px; height: 64px;
+      stroke: var(--text); fill: none;
+      stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .empty h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+    .empty p  { font-size: 14px; color: var(--text2); line-height: 1.65; }
 
-    /* ===== RANKING ===== */
-    #tRank { padding: 16px; }
-    .stitle { font-size: 20px; font-weight: 900; padding: 8px 4px 0; margin-bottom: 16px; }
-
-    .rcard {
-      background: var(--card); border-radius: 16px; padding: 16px;
-      margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    /* ── WORLD ── */
+    #tWorld { padding: 16px; }
+    .sec-label {
+      font-size: 11px; font-weight: 700; color: var(--text3);
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 4px 2px 14px;
     }
-    .rnum { font-size: 22px; font-weight: 900; color: var(--primary); min-width: 36px; text-align: center; padding-top: 2px; }
-    .rnum.g { color: #f59e0b; }
-    .rnum.s { color: #9ca3af; }
-    .rnum.b { color: #d97706; }
-    .rcov {
-      width: 56px; height: 74px; border-radius: 8px;
-      object-fit: cover; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 28px;
+    .wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wcard {
+      background: var(--card); border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: transform 0.13s, border-color 0.13s;
     }
-    .rinfo { flex: 1; min-width: 0; }
-    .rtitle { font-size: 15px; font-weight: 800; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .rauthor { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
-    .rmemo {
-      font-size: 13px; color: var(--text); line-height: 1.5;
+    .wcard:active { transform: scale(0.96); border-color: rgba(240,165,0,0.3); }
+    .wcov {
+      width: 100%; height: 112px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .wcov img { width: 100%; height: 100%; object-fit: cover; }
+    .wcov svg {
+      width: 34px; height: 34px;
+      stroke: rgba(255,255,255,0.15); fill: none;
+      stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .wbody { padding: 10px 12px 12px; }
+    .w-title {
+      font-size: 12px; font-weight: 800; margin-bottom: 4px;
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
     }
-    .rmeta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
-    .ruser { font-size: 12px; color: var(--text2); }
-    .rlikes { font-size: 13px; font-weight: 800; color: var(--primary); }
+    .w-memo {
+      font-size: 11px; color: var(--text2); line-height: 1.55; margin-bottom: 7px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .w-meta { display: flex; align-items: center; justify-content: space-between; }
+    .w-user  { font-size: 10px; color: var(--text3); }
+    .w-likes { font-size: 11px; font-weight: 800; color: var(--primary); }
 
-    /* ===== MY ===== */
+    /* ── RANKING ── */
+    #tRank { padding: 16px; }
+    .rcard {
+      background: var(--card); border-radius: 16px; padding: 16px;
+      margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start;
+      border: 1px solid var(--border);
+    }
+    .rnum {
+      font-size: 18px; font-weight: 900; min-width: 32px;
+      text-align: center; padding-top: 2px;
+      color: var(--text3); font-variant-numeric: tabular-nums;
+    }
+    .rnum.n1 { color: #f0a500; }
+    .rnum.n2 { color: #9ca3af; }
+    .rnum.n3 { color: #b07c3e; }
+    .rcov {
+      width: 52px; height: 70px; border-radius: 8px; flex-shrink: 0;
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+    }
+    .rcov img { width: 100%; height: 100%; object-fit: cover; }
+    .rcov svg {
+      width: 26px; height: 26px;
+      stroke: rgba(255,255,255,0.15); fill: none;
+      stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .rinfo { flex: 1; min-width: 0; }
+    .r-title {
+      font-size: 14px; font-weight: 800; margin-bottom: 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .r-author { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+    .r-memo {
+      font-size: 12px; color: rgba(237,237,245,0.65); line-height: 1.55;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .r-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .r-user  { font-size: 11px; color: var(--text3); }
+    .r-likes { font-size: 12px; font-weight: 800; color: var(--primary); }
+
+    /* ── MY ── */
     #tMy { padding: 16px; }
-    .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .mcard {
       background: var(--card); border-radius: 16px; overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
-      transition: transform 0.13s;
+      border: 1px solid var(--border); cursor: pointer; transition: transform 0.13s;
     }
     .mcard:active { transform: scale(0.96); }
     .mcov {
-      width: 100%; height: 120px; object-fit: cover;
-      display: flex; align-items: center; justify-content: center; font-size: 40px;
+      width: 100%; height: 112px;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .mcov img { width: 100%; height: 100%; object-fit: cover; }
+    .mcov svg {
+      width: 34px; height: 34px;
+      stroke: rgba(255,255,255,0.15); fill: none;
+      stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round;
     }
     .mbody { padding: 10px 12px 14px; }
-    .mbtitle { font-size: 13px; font-weight: 700; margin-bottom: 4px;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .mlikes { font-size: 12px; font-weight: 700; color: var(--primary); }
+    .m-title {
+      font-size: 12px; font-weight: 800; margin-bottom: 4px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .m-likes { font-size: 11px; font-weight: 700; color: var(--primary); }
 
-    /* ===== FAB ===== */
+    /* ── FAB ── */
     #fab {
       position: fixed; right: calc(50% - 195px);
       bottom: calc(var(--nav-h) + 16px);
-      width: 58px; height: 58px; border-radius: 50%;
-      background: var(--primary); color: white; border: none;
-      font-size: 30px; font-weight: 300; cursor: pointer; z-index: 180;
-      box-shadow: 0 4px 22px rgba(94,53,177,0.45);
+      width: 54px; height: 54px; border-radius: 50%;
+      background: var(--primary); border: none; cursor: pointer; z-index: 180;
+      box-shadow: 0 4px 24px var(--primary-glow);
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.13s;
     }
     #fab:active { transform: scale(0.90); }
+    #fab svg {
+      width: 22px; height: 22px;
+      stroke: #0d0d14; fill: none;
+      stroke-width: 2.6; stroke-linecap: round;
+    }
 
-    /* ===== MODALS ===== */
+    /* ── MODALS ── */
     .mover {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.52);
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
       z-index: 300; display: flex; align-items: flex-end; justify-content: center;
     }
     .mover.h { display: none; }
     .msheet {
-      background: var(--card); border-radius: 24px 24px 0 0;
-      width: 100%; max-width: 430px; padding: 20px 20px 44px;
+      background: var(--bg2); border-radius: 24px 24px 0 0;
+      width: 100%; max-width: 430px; padding: 20px 20px 48px;
       max-height: 92vh; overflow-y: auto;
+      border-top: 1px solid var(--border);
     }
-    .mhandle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
-    .mtitle { font-size: 20px; font-weight: 900; margin-bottom: 18px; }
+    .mhandle {
+      width: 36px; height: 4px; background: var(--border);
+      border-radius: 2px; margin: 0 auto 20px;
+    }
+    .m-heading { font-size: 19px; font-weight: 900; margin-bottom: 20px; }
 
     /* photo upload */
     .parea {
-      width: 100%; height: 150px; border: 2px dashed var(--border); border-radius: 16px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 6px; cursor: pointer; margin-bottom: 16px; overflow: hidden; position: relative;
-      transition: border-color 0.2s;
+      width: 100%; height: 138px;
+      border: 1.5px dashed var(--border); border-radius: 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; margin-bottom: 18px; overflow: hidden;
+      position: relative; transition: border-color 0.2s;
+      background: var(--card);
     }
     .parea:hover { border-color: var(--primary); }
-    .parea.hp { border: none; }
+    .parea.has-img { border: none; }
     .parea img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-    .parea-lbl { font-size: 13px; color: var(--text2); }
+    .parea svg {
+      width: 28px; height: 28px; stroke: var(--text3); fill: none;
+      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .parea-lbl { font-size: 13px; color: var(--text3); }
     .premov {
-      position: absolute; top: 8px; right: 8px; width: 28px; height: 28px;
-      background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%;
+      position: absolute; top: 8px; right: 8px;
+      width: 28px; height: 28px; background: rgba(0,0,0,0.65);
+      color: white; border: none; border-radius: 50%;
       font-size: 13px; cursor: pointer; z-index: 1;
       display: flex; align-items: center; justify-content: center;
     }
     #pInput { display: none; }
 
     /* form */
-    .flbl { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 6px; display: block; }
+    .flbl {
+      font-size: 11px; font-weight: 700; color: var(--text2);
+      margin-bottom: 7px; display: block; letter-spacing: 0.5px; text-transform: uppercase;
+    }
     .finp {
       width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
       padding: 12px 14px; font-size: 15px; font-family: inherit;
-      color: var(--text); background: var(--bg); margin-bottom: 14px;
+      color: var(--text); background: var(--card); margin-bottom: 16px;
       outline: none; transition: border-color 0.2s;
     }
+    .finp::placeholder { color: var(--text3); }
     .finp:focus { border-color: var(--primary); }
-    textarea.finp { height: 110px; resize: none; line-height: 1.6; }
+    textarea.finp { height: 112px; resize: none; line-height: 1.65; }
 
-    .trow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+    .trow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
     .tchip {
-      padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
-      font-size: 13px; font-weight: 600; background: var(--bg); color: var(--text2);
+      padding: 6px 14px; border-radius: 20px;
+      border: 1.5px solid var(--border);
+      font-size: 12px; font-weight: 600;
+      background: var(--card); color: var(--text2);
       cursor: pointer; transition: all 0.15s;
     }
-    .tchip.on { background: var(--primary); border-color: var(--primary); color: white; }
+    .tchip.on {
+      background: var(--primary-dim);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
 
     .sbtn {
-      width: 100%; background: var(--primary); color: white; border: none;
+      width: 100%; background: var(--primary); color: #0d0d14; border: none;
       border-radius: 16px; padding: 16px; font-size: 16px; font-weight: 900;
       cursor: pointer; transition: opacity 0.2s;
     }
     .sbtn:active { opacity: 0.82; }
     .ccbtn {
       width: 100%; background: none; border: none; padding: 12px;
-      font-size: 14px; color: var(--text2); cursor: pointer; margin-top: 4px;
+      font-size: 14px; color: var(--text3); cursor: pointer; margin-top: 4px;
     }
 
-    /* detail */
-    .dimg { width: 100%; height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; }
-    .diph { width: 100%; height: 160px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 56px; margin-bottom: 16px; }
-    .dbtitle { font-size: 20px; font-weight: 900; margin-bottom: 4px; }
-    .dbauthor { font-size: 14px; color: var(--text2); margin-bottom: 14px; }
-    .dmemo { font-size: 15px; line-height: 1.7; margin-bottom: 24px; }
-    .dbtns { display: flex; gap: 12px; }
-    .ddbtn {
-      flex: 1; padding: 14px; border: 1.5px solid #fee2e2; border-radius: 12px;
-      background: white; color: #ef4444; font-size: 14px; font-weight: 700; cursor: pointer;
+    /* detail modal */
+    .d-img { width: 100%; height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 18px; }
+    .d-iph {
+      width: 100%; height: 160px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
     }
-    .dclbtn {
-      flex: 1; padding: 14px; border: none; border-radius: 12px;
-      background: #f3f4f6; color: var(--text2); font-size: 14px; font-weight: 700; cursor: pointer;
+    .d-iph svg {
+      width: 52px; height: 52px; stroke: rgba(255,255,255,0.15); fill: none;
+      stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .d-title  { font-size: 20px; font-weight: 900; margin-bottom: 4px; }
+    .d-author { font-size: 14px; color: var(--text2); margin-bottom: 16px; }
+    .d-memo   { font-size: 15px; line-height: 1.75; margin-bottom: 28px; color: rgba(237,237,245,0.85); }
+    .d-btns   { display: flex; gap: 12px; }
+    .d-del {
+      flex: 1; padding: 14px; border-radius: 12px;
+      border: 1.5px solid rgba(244,63,94,0.3); background: rgba(244,63,94,0.08);
+      color: var(--bad); font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .d-close {
+      flex: 1; padding: 14px; border-radius: 12px;
+      border: 1.5px solid var(--border); background: var(--card);
+      color: var(--text2); font-size: 14px; font-weight: 700; cursor: pointer;
     }
 
     /* toast */
     #toast {
-      position: fixed; bottom: calc(var(--nav-h) + 76px); left: 50%;
-      transform: translateX(-50%) translateY(16px);
-      background: #1a1a2e; color: white; padding: 11px 22px; border-radius: 24px;
-      font-size: 14px; font-weight: 600; opacity: 0;
-      transition: opacity 0.28s, transform 0.28s;
+      position: fixed; bottom: calc(var(--nav-h) + 82px); left: 50%;
+      transform: translateX(-50%) translateY(14px);
+      background: var(--card2); color: var(--text); padding: 11px 22px;
+      border-radius: 24px; border: 1px solid var(--border);
+      font-size: 13px; font-weight: 600; opacity: 0;
+      transition: opacity 0.26s, transform 0.26s;
       pointer-events: none; white-space: nowrap; z-index: 500;
     }
     #toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -326,68 +498,133 @@
 </head>
 <body>
 
+<!-- ── HEADER ── -->
 <div id="hdr">
-  <div class="logo">📚 ブックノート<em>.</em></div>
-  <div class="hdr-sub">本の学びを交換する</div>
+  <div class="logo">book<b>note</b></div>
+  <div class="hdr-pill">BETA</div>
 </div>
 
+<!-- ── MAIN ── -->
 <div id="main">
-  <!-- HOME -->
+
+  <!-- HOME / SWAP -->
   <div class="tab" id="tHome">
-    <div class="stack" id="stack"></div>
-    <div class="abtns" id="abtns">
-      <button class="abtn bad"  onclick="vote('bad')">✕</button>
-      <button class="abtn skip" onclick="skipCard()">↩</button>
-      <button class="abtn good" onclick="vote('good')">❤️</button>
+
+    <!-- LOCKED (未投稿) -->
+    <div id="lockScreen">
+      <div class="lock-ring">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="lock-h">学びを投稿して<br>交換を始めよう</div>
+      <div class="lock-p">あなたの読書ノートを投稿すると<br>みんなの学びが解放されます</div>
+      <button class="lock-btn" onclick="openPost()">投稿する</button>
+    </div>
+
+    <!-- UNLOCKED (投稿済み) -->
+    <div id="swipeWrap" style="display:none">
+      <div class="stack" id="stack"></div>
+      <div class="abtns" id="abtns">
+        <button class="abtn bad" onclick="vote('bad')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <button class="abtn skip" onclick="skipCard()">
+          <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.52"/></svg>
+        </button>
+        <button class="abtn good" onclick="vote('good')">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORLD / みんなの -->
+  <div class="tab" id="tWorld">
+    <div id="tWorldInner" style="padding:16px">
+      <div class="sec-label">みんなの本棚</div>
+      <div class="wgrid" id="worldGrid"></div>
     </div>
   </div>
 
   <!-- RANKING -->
   <div class="tab" id="tRank">
-    <div class="stitle">🏆 ランキング</div>
-    <div id="rankList"></div>
+    <div style="padding:16px">
+      <div class="sec-label">人気ランキング</div>
+      <div id="rankList"></div>
+    </div>
   </div>
 
   <!-- MY -->
   <div class="tab" id="tMy">
-    <div class="stitle">📖 マイポスト</div>
-    <div id="myContent"></div>
+    <div style="padding:16px">
+      <div class="sec-label">マイ本棚</div>
+      <div id="myContent"></div>
+    </div>
   </div>
 </div>
 
+<!-- ── NAV ── -->
 <nav id="nav">
   <button class="nb on" id="nbHome" onclick="sw('Home')">
-    <span class="ni">🏠</span><span>ホーム</span>
+    <svg viewBox="0 0 24 24">
+      <polyline points="17 1 21 5 17 9"/>
+      <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+      <polyline points="7 23 3 19 7 15"/>
+      <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+    </svg>
+    <span>交換</span>
+  </button>
+  <button class="nb" id="nbWorld" onclick="sw('World')">
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+    <span>みんなの</span>
   </button>
   <button class="nb" id="nbRank" onclick="sw('Rank')">
-    <span class="ni">🏆</span><span>ランキング</span>
+    <svg viewBox="0 0 24 24">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6"  y1="20" x2="6"  y2="14"/>
+    </svg>
+    <span>ランキング</span>
   </button>
   <button class="nb" id="nbMy" onclick="sw('My')">
-    <span class="ni">📖</span><span>マイポスト</span>
+    <svg viewBox="0 0 24 24">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>
+    <span>マイ本棚</span>
   </button>
 </nav>
 
-<button id="fab" onclick="openPost()">＋</button>
+<!-- FAB -->
+<button id="fab" onclick="openPost()">
+  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+</button>
 
 <!-- POST MODAL -->
 <div class="mover h" id="postMod">
   <div class="msheet">
     <div class="mhandle"></div>
-    <div class="mtitle">📚 読書メモを投稿</div>
+    <div class="m-heading">読書メモを投稿</div>
     <div class="parea" id="pArea" onclick="document.getElementById('pInput').click()">
-      <div style="font-size:32px">📷</div>
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       <div class="parea-lbl">本の写真を追加（任意）</div>
     </div>
     <input type="file" id="pInput" accept="image/*" onchange="handlePic(this)">
-    <label class="flbl">本のタイトル <span style="color:var(--bad)">*</span></label>
+    <label class="flbl">本のタイトル *</label>
     <input class="finp" id="fT" placeholder="例：嫌われる勇気" type="text">
     <label class="flbl">著者</label>
     <input class="finp" id="fA" placeholder="例：岸見一郎" type="text">
     <label class="flbl">カテゴリ</label>
     <div class="trow" id="tagRow"></div>
-    <label class="flbl">学び・日記 <span style="color:var(--bad)">*</span></label>
+    <label class="flbl">学び・気づき *</label>
     <textarea class="finp" id="fM" placeholder="この本から得た気づき、感想、今日の学びを書こう..."></textarea>
-    <button class="sbtn" onclick="submitPost()">投稿する ✨</button>
+    <button class="sbtn" onclick="submitPost()">投稿する</button>
     <button class="ccbtn" onclick="closePost()">キャンセル</button>
   </div>
 </div>
@@ -403,87 +640,105 @@
 <div id="toast"></div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────
+// ─── CONSTANTS ──────────────────────────────────────
 const TAGS = ['ビジネス','自己啓発','哲学','経済','心理','科学','小説','その他'];
 
 const GRADS = [
-  ['#667eea','#764ba2'],['#f093fb','#f5576c'],['#4facfe','#00f2fe'],
-  ['#43e97b','#38f9d7'],['#fa709a','#fee140'],['#a18cd1','#fbc2eb'],
-  ['#ffecd2','#fcb69f'],['#ff9a9e','#fecfef'],['#a1c4fd','#c2e9fb'],
-  ['#fddb92','#d1fdff'],['#96fbc4','#f9f586'],['#fccb90','#d57eeb'],
+  ['#0f1629','#1a2a4a'],['#130d22','#2a1545'],['#0d1f1a','#1a3d2d'],
+  ['#1f0d0d','#3d1a1a'],['#0d1a2a','#1a3040'],['#1a1229','#2d1f45'],
+  ['#0d2020','#1a3535'],['#201a0d','#3d3012'],['#0d0d20','#1a1a3a'],
+  ['#1a0d20','#35153d'],['#0d1f0d','#1a3520'],['#200d1a','#3d1530'],
 ];
-function grad(title) {
-  let h = 0;
-  for (let c of title) h = ((h << 5) - h) + c.charCodeAt(0);
+function grad(t) {
+  let h = 0; for (let c of t) h = ((h<<5)-h)+c.charCodeAt(0);
   return GRADS[Math.abs(h) % GRADS.length];
 }
 
+const BOOK_SVG = `<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`;
+
 const DEMO = [
-  { id:'d1', user:{name:'葵',emoji:'🌿',bg:'#d8f3dc'}, book:{title:'ゼロ・トゥ・ワン',author:'ピーター・ティール'}, tag:'ビジネス', photo:null,
-    memo:'「競争は敗者のゲーム」というフレーズが刺さった。スタートアップが目指すべきは独占であり、1から10ではなく0から1を創ること。\n\n自分のやっていることがコモディティになっていないか、毎月問い直したい。', date:'2026-05-15', likes:47 },
-  { id:'d2', user:{name:'健人',emoji:'⚡',bg:'#ffddd2'}, book:{title:'思考の整理学',author:'外山滋比古'}, tag:'自己啓発', photo:null,
-    memo:'グライダーと飛行機の比喩が秀逸。外から動力をもらわないと飛べないグライダー人間ではなく、自分で飛べる飛行機型になれという話。\n\n「忘れることを恐れるな。忘れることが思考を軽くする」も印象的だった。', date:'2026-05-14', likes:39 },
-  { id:'d3', user:{name:'美沙',emoji:'🌸',bg:'#f0e6ff'}, book:{title:'エッセンシャル思考',author:'グレッグ・マキューン'}, tag:'自己啓発', photo:null,
-    memo:'「やらないことを決める」より「やることを徹底的に絞る」という考え方の転換が一番効いた。本当に重要な1割に全力を注ぐことが最大のインパクトを生む。\n\n今週から毎朝「今日の最重要事項は1つだけ」と決めてから仕事を始めている。', date:'2026-05-13', likes:62 },
-  { id:'d4', user:{name:'涼太',emoji:'🔥',bg:'#fef3c7'}, book:{title:'SHOE DOG',author:'フィル・ナイト'}, tag:'ビジネス', photo:null,
-    memo:'Nikeの創業物語。倒産寸前から世界最大スポーツブランドになるまでの軌跡が圧巻。フィル・ナイトが「狂気的に走り続けることが使命だと信じていた」と書いているシーンが一番刺さった。\n\n起業する人は必読。', date:'2026-05-12', likes:55 },
-  { id:'d5', user:{name:'花',emoji:'✨',bg:'#a8dadc'}, book:{title:'FACTFULNESS',author:'ハンス・ロスリング'}, tag:'経済', photo:null,
-    memo:'世界についての直感がほぼ全部間違っていることを、データで叩きつけられた。「ネガティブ本能」と「直線本能」が自分に刺さった。\n\n悲観的なニュースばかり目につくのは、そういう本能があるからだと分かると少し楽になる。', date:'2026-05-11', likes:33 },
-  { id:'d6', user:{name:'葵',emoji:'🌿',bg:'#d8f3dc'}, book:{title:'嫌われる勇気',author:'岸見一郎・古賀史健'}, tag:'哲学', photo:null,
-    memo:'「他者の期待を満たすために生きてはいけない」という言葉に初めて腑に落ちた。課題の分離を実践すると、驚くほど心が軽くなる。\n\n頭で分かることと心で分かることの違いを実感した一冊。', date:'2026-05-09', likes:71 },
-  { id:'d7', user:{name:'健人',emoji:'⚡',bg:'#ffddd2'}, book:{title:'１分で話せ',author:'伊藤羊一'}, tag:'ビジネス', photo:null,
-    memo:'プレゼンは相手の頭の中にYESを作ること。「人は論理では動かない、感情で動いて論理で正当化する」というのが刺さった。\n\n上司への提案が通らないのは、論理ばかり並べていたから。', date:'2026-05-08', likes:28 },
-  { id:'d8', user:{name:'美沙',emoji:'🌸',bg:'#f0e6ff'}, book:{title:'アウトプット大全',author:'樺沢紫苑'}, tag:'自己啓発', photo:null,
-    memo:'インプット3:アウトプット7が理想比率。本ばかり読んで「分かった気」になるのが一番やばいパターンだと自覚した。\n\nこのノートを書くのもその一環。書くことで本当に理解しているかが分かる。', date:'2026-05-06', likes:44 },
+  { id:'d1', user:{name:'Aoi', ini:'A', bg:'#1e3a5f'},
+    book:{title:'ゼロ・トゥ・ワン', author:'ピーター・ティール'}, tag:'ビジネス', photo:null,
+    memo:'「競争は敗者のゲーム」というフレーズが刺さった。スタートアップが目指すべきは独占であり、1から10ではなく0から1を創ること。自分のやっていることがコモディティになっていないか、毎月問い直したい。', date:'2026-05-15', likes:47 },
+  { id:'d2', user:{name:'Kento', ini:'K', bg:'#2d1b4e'},
+    book:{title:'思考の整理学', author:'外山滋比古'}, tag:'自己啓発', photo:null,
+    memo:'グライダーと飛行機の比喩が秀逸。外から動力をもらわないと飛べないグライダー人間ではなく、自分で飛べる飛行機型になれという話。「忘れることを恐れるな。忘れることが思考を軽くする」も印象的だった。', date:'2026-05-14', likes:39 },
+  { id:'d3', user:{name:'Misa', ini:'M', bg:'#1e3d3d'},
+    book:{title:'エッセンシャル思考', author:'グレッグ・マキューン'}, tag:'自己啓発', photo:null,
+    memo:'「やることを徹底的に絞る」という考え方の転換が一番効いた。本当に重要な1割に全力を注ぐことが最大のインパクトを生む。今週から毎朝「今日の最重要事項は1つだけ」と決めてから仕事を始めている。', date:'2026-05-13', likes:62 },
+  { id:'d4', user:{name:'Ryota', ini:'R', bg:'#3a2050'},
+    book:{title:'SHOE DOG', author:'フィル・ナイト'}, tag:'ビジネス', photo:null,
+    memo:'Nikeの創業物語。倒産寸前から世界最大スポーツブランドになるまでの軌跡が圧巻。フィル・ナイトが「狂気的に走り続けることが使命だと信じていた」と書いているシーンが一番刺さった。', date:'2026-05-12', likes:55 },
+  { id:'d5', user:{name:'Hana', ini:'H', bg:'#1a3344'},
+    book:{title:'FACTFULNESS', author:'ハンス・ロスリング'}, tag:'経済', photo:null,
+    memo:'世界についての直感がほぼ全部間違っていることを、データで叩きつけられた。「ネガティブ本能」と「直線本能」が自分に刺さった。悲観的なニュースばかり目につくのは、そういう本能があるからだと分かると少し楽になる。', date:'2026-05-11', likes:33 },
+  { id:'d6', user:{name:'Aoi', ini:'A', bg:'#1e3a5f'},
+    book:{title:'嫌われる勇気', author:'岸見一郎・古賀史健'}, tag:'哲学', photo:null,
+    memo:'「他者の期待を満たすために生きてはいけない」という言葉に初めて腑に落ちた。課題の分離を実践すると、驚くほど心が軽くなる。頭で分かることと心で分かることの違いを実感した一冊。', date:'2026-05-09', likes:71 },
+  { id:'d7', user:{name:'Kento', ini:'K', bg:'#2d1b4e'},
+    book:{title:'１分で話せ', author:'伊藤羊一'}, tag:'ビジネス', photo:null,
+    memo:'プレゼンは相手の頭の中にYESを作ること。「人は論理では動かない、感情で動いて論理で正当化する」というのが刺さった。上司への提案が通らないのは、論理ばかり並べていたから。', date:'2026-05-08', likes:28 },
+  { id:'d8', user:{name:'Misa', ini:'M', bg:'#1e3d3d'},
+    book:{title:'アウトプット大全', author:'樺沢紫苑'}, tag:'自己啓発', photo:null,
+    memo:'インプット3:アウトプット7が理想比率。本ばかり読んで「分かった気」になるのが一番やばいパターンだと自覚した。このノートを書くのもその一環。書くことで本当に理解しているかが分かる。', date:'2026-05-06', likes:44 },
 ];
 
 // ─── STATE ──────────────────────────────────────────
 let userNotes = JSON.parse(localStorage.getItem('bn_notes') || '[]');
 let votes     = JSON.parse(localStorage.getItem('bn_votes') || '{}');
-let curTab    = 'Home';
-let selTag    = '';
-let picData   = null;
+let selTag = '', picData = null;
 
 // ─── TABS ────────────────────────────────────────────
 function sw(tab) {
-  curTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
   document.getElementById('t'+tab).classList.add('on');
   document.getElementById('nb'+tab).classList.add('on');
-  if (tab==='Home') renderHome();
-  if (tab==='Rank') renderRank();
-  if (tab==='My')   renderMy();
+  if (tab==='Home')  renderHome();
+  if (tab==='World') renderWorld();
+  if (tab==='Rank')  renderRank();
+  if (tab==='My')    renderMy();
 }
 
 // ─── HOME ────────────────────────────────────────────
 function allPosts() {
-  return [...userNotes, ...DEMO].sort((a,b) => b.date.localeCompare(a.date));
+  return [...userNotes, ...DEMO].sort((a,b)=>b.date.localeCompare(a.date));
 }
-
 function queue() {
   const seen = Object.keys(votes);
   const all  = allPosts();
-  const uns  = all.filter(p => !seen.includes(p.id));
+  const uns  = all.filter(p=>!seen.includes(p.id));
   return uns.length ? uns : all;
 }
 
 function renderHome() {
+  const locked  = document.getElementById('lockScreen');
+  const swWrap  = document.getElementById('swipeWrap');
+  const hasPosted = userNotes.length > 0;
+
+  if (!hasPosted) {
+    locked.style.display  = 'flex';
+    swWrap.style.display  = 'none';
+    return;
+  }
+  locked.style.display = 'none';
+  swWrap.style.display = 'flex';
+
   const st  = document.getElementById('stack');
   const btn = document.getElementById('abtns');
   const q   = queue();
 
   if (!q.length) {
-    st.innerHTML = `<div class="empty"><div class="ei">📚</div><h3>まだ投稿がありません</h3><p>最初の読書メモを投稿してみよう！</p></div>`;
+    st.innerHTML = `<div class="empty"><div class="empty-ico">${BOOK_SVG}</div><h3>すべて見ました</h3><p>また後で確認してみよう</p></div>`;
     btn.style.display = 'none'; return;
   }
   btn.style.display = 'flex';
   st.innerHTML = '';
-  const show = q.slice(0, 3);
-  for (let i = show.length - 1; i >= 0; i--) {
+  const show = q.slice(0,3);
+  for (let i = show.length-1; i >= 0; i--) {
     const el = buildCard(show[i]);
-    if (i === show.length - 1) el.classList.add('back2');
-    else if (i === show.length - 2) el.classList.add('back1');
+    if (i===show.length-1) el.classList.add('back2');
+    else if (i===show.length-2) el.classList.add('back1');
     else el.classList.add('top');
     st.appendChild(el);
   }
@@ -493,199 +748,209 @@ function renderHome() {
 function buildCard(p) {
   const [g1,g2] = grad(p.book.title);
   const d = document.createElement('div');
-  d.className = 'scard';
-  d.dataset.id = p.id;
+  d.className = 'scard'; d.dataset.id = p.id;
   d.innerHTML = `
     ${p.photo
       ? `<img class="scard-img" src="${p.photo}">`
-      : `<div class="scard-img-ph" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
-    <div class="scard-user">
-      <div class="scard-av" style="background:${p.user.bg}">${p.user.emoji}</div>
+      : `<div class="scard-img-ph" style="background:linear-gradient(150deg,${g1},${g2})">${BOOK_SVG}</div>`}
+    <div class="scard-chip-user">
+      <div class="scard-av" style="background:${p.user.bg}">${p.user.ini||p.user.name.slice(0,1)}</div>
       <span class="scard-uname">${esc(p.user.name)}</span>
     </div>
-    <span class="scard-tag">${esc(p.tag||'その他')}</span>
+    <span class="scard-chip-tag">${esc(p.tag||'その他')}</span>
     <div class="scard-body">
-      <div class="scard-btitle">『${esc(p.book.title)}』</div>
-      <div class="scard-bauthor">${esc(p.book.author||'')}</div>
+      <div class="scard-title">${esc(p.book.title)}</div>
+      <div class="scard-author">${esc(p.book.author||'')}</div>
       <div class="scard-memo">${esc(p.memo)}</div>
     </div>
-    <div class="vov good" id="vg-${p.id}"><span class="vlabel">GOOD ✨</span></div>
-    <div class="vov bad"  id="vb-${p.id}"><span class="vlabel">PASS 👎</span></div>`;
+    <div class="vov good" id="vg-${p.id}"><span class="vlabel">GOOD</span></div>
+    <div class="vov bad"  id="vb-${p.id}"><span class="vlabel">PASS</span></div>`;
   return d;
 }
 
 function initSwipe(card, post) {
-  if (!card || !post) return;
-  let sx, sy, drag = false;
+  if (!card||!post) return;
+  let sx, drag = false;
   const THR = 85;
-
   const start = e => {
-    drag = true; card.style.transition = 'none';
-    const pt = e.touches ? e.touches[0] : e;
-    sx = pt.clientX; sy = pt.clientY;
+    drag=true; card.style.transition='none';
+    sx = (e.touches?e.touches[0]:e).clientX;
   };
   const move = e => {
     if (!drag) return; e.preventDefault();
-    const pt = e.touches ? e.touches[0] : e;
-    const dx = pt.clientX - sx, dy = pt.clientY - sy;
-    card.style.transform = `translateX(${dx}px) translateY(${dy * 0.25}px) rotate(${dx * 0.07}deg)`;
+    const dx = (e.touches?e.touches[0]:e).clientX - sx;
+    const dy = (e.touches?e.touches[0]:e).clientY - ((e.touches?e.touches[0]:e).clientY);
+    card.style.transform = `translateX(${dx}px) rotate(${dx*0.07}deg)`;
     const vg = document.getElementById(`vg-${post.id}`);
     const vb = document.getElementById(`vb-${post.id}`);
-    if (dx > 30)  { if(vg) vg.style.opacity = Math.min(dx/THR,1); if(vb) vb.style.opacity = 0; }
-    else if (dx < -30) { if(vb) vb.style.opacity = Math.min(-dx/THR,1); if(vg) vg.style.opacity = 0; }
-    else { if(vg) vg.style.opacity=0; if(vb) vb.style.opacity=0; }
+    if (dx>30)      { if(vg) vg.style.opacity=Math.min(dx/THR,1); if(vb) vb.style.opacity=0; }
+    else if (dx<-30){ if(vb) vb.style.opacity=Math.min(-dx/THR,1); if(vg) vg.style.opacity=0; }
+    else            { if(vg) vg.style.opacity=0; if(vb) vb.style.opacity=0; }
   };
   const end = e => {
-    if (!drag) return; drag = false;
-    const pt = e.changedTouches ? e.changedTouches[0] : e;
-    const dx = pt.clientX - sx;
-    card.style.transition = 'transform 0.28s ease';
-    if (dx > THR) {
+    if (!drag) return; drag=false;
+    const dx = (e.changedTouches?e.changedTouches[0]:e).clientX - sx;
+    card.style.transition='transform 0.28s ease';
+    if (dx>THR) {
       card.classList.add('fr');
-      setTimeout(() => { doVote(post.id,'good'); renderHome(); }, 320);
-    } else if (dx < -THR) {
+      setTimeout(()=>{ doVote(post.id,'good'); renderHome(); },320);
+    } else if (dx<-THR) {
       card.classList.add('fl');
-      setTimeout(() => { doVote(post.id,'bad'); renderHome(); }, 320);
+      setTimeout(()=>{ doVote(post.id,'bad'); renderHome(); },320);
     } else {
-      card.style.transform = '';
-      const vg = document.getElementById(`vg-${post.id}`);
-      const vb = document.getElementById(`vb-${post.id}`);
+      card.style.transform='';
+      const vg=document.getElementById(`vg-${post.id}`);
+      const vb=document.getElementById(`vb-${post.id}`);
       if(vg) vg.style.opacity=0; if(vb) vb.style.opacity=0;
     }
   };
-  card.addEventListener('mousedown', start);
-  card.addEventListener('touchstart', start, {passive:false});
-  window.addEventListener('mousemove', move);
-  card.addEventListener('touchmove', move, {passive:false});
-  window.addEventListener('mouseup', end);
-  card.addEventListener('touchend', end);
+  card.addEventListener('mousedown',start);
+  card.addEventListener('touchstart',start,{passive:false});
+  window.addEventListener('mousemove',move);
+  card.addEventListener('touchmove',move,{passive:false});
+  window.addEventListener('mouseup',end);
+  card.addEventListener('touchend',end);
 }
 
 function vote(type) {
-  const q = queue();
-  if (!q.length) return;
-  const p = q[0];
-  const card = document.querySelector(`.scard.top`);
-  if (!card) return;
-  const ov = document.getElementById(type==='good' ? `vg-${p.id}` : `vb-${p.id}`);
-  if (ov) ov.style.opacity = 1;
-  card.style.transition = 'transform 0.28s ease';
-  card.classList.add(type==='good' ? 'fr' : 'fl');
-  setTimeout(() => { doVote(p.id, type); renderHome(); }, 320);
+  const q=queue(); if(!q.length) return;
+  const p=q[0];
+  const card=document.querySelector('.scard.top'); if(!card) return;
+  const ov=document.getElementById(type==='good'?`vg-${p.id}`:`vb-${p.id}`);
+  if(ov) ov.style.opacity=1;
+  card.style.transition='transform 0.28s ease';
+  card.classList.add(type==='good'?'fr':'fl');
+  setTimeout(()=>{ doVote(p.id,type); renderHome(); },320);
 }
-
 function skipCard() {
-  const q = queue();
-  if (!q.length) return;
-  doVote(q[0].id, 'skip');
-  renderHome();
+  const q=queue(); if(!q.length) return;
+  doVote(q[0].id,'skip'); renderHome();
 }
-
-function doVote(id, type) {
-  votes[id] = type;
-  localStorage.setItem('bn_votes', JSON.stringify(votes));
-  if (type === 'good') {
-    const d = DEMO.find(x => x.id===id); if(d) d.likes++;
-    const u = userNotes.find(x => x.id===id); if(u) { u.likes=(u.likes||0)+1; localStorage.setItem('bn_notes',JSON.stringify(userNotes)); }
+function doVote(id,type) {
+  votes[id]=type; localStorage.setItem('bn_votes',JSON.stringify(votes));
+  if(type==='good'){
+    const d=DEMO.find(x=>x.id===id); if(d) d.likes++;
+    const u=userNotes.find(x=>x.id===id);
+    if(u){ u.likes=(u.likes||0)+1; localStorage.setItem('bn_notes',JSON.stringify(userNotes)); }
   }
-  if (type==='good') toast('❤️ GOOD！');
-  if (type==='bad')  toast('👋 パス');
+  if(type==='good') toast('GOOD  ❤');
+  if(type==='bad')  toast('パス');
 }
 
-// ─── RANKING ─────────────────────────────────────────
-function renderRank() {
-  const all = allPosts().sort((a,b)=>(b.likes||0)-(a.likes||0));
-  const el  = document.getElementById('rankList');
-  if (!all.length) { el.innerHTML='<p style="text-align:center;color:#6b7280;padding:40px">まだ投稿がありません</p>'; return; }
-  el.innerHTML = all.map((p,i) => {
-    const [g1,g2] = grad(p.book.title);
-    const nc = i===0?'g':i===1?'s':i===2?'b':'';
-    const nl = i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
-    return `<div class="rcard">
-      <div class="rnum ${nc}">${nl}</div>
-      ${p.photo
-        ? `<img class="rcov" src="${p.photo}">`
-        : `<div class="rcov" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
-      <div class="rinfo">
-        <div class="rtitle">『${esc(p.book.title)}』</div>
-        <div class="rauthor">${esc(p.book.author||'')}</div>
-        <div class="rmemo">${esc(p.memo)}</div>
-        <div class="rmeta">
-          <span class="ruser">${p.user.emoji} ${esc(p.user.name)}</span>
-          <span class="rlikes">❤️ ${p.likes||0}</span>
+// ─── WORLD ───────────────────────────────────────────
+function renderWorld() {
+  const el=document.getElementById('worldGrid');
+  const all=allPosts();
+  if(!all.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-ico">${BOOK_SVG}</div><h3>まだ投稿がありません</h3></div>`; return; }
+  el.innerHTML=all.map(p=>{
+    const [g1,g2]=grad(p.book.title);
+    return `<div class="wcard">
+      <div class="wcov" style="background:linear-gradient(150deg,${g1},${g2})">
+        ${p.photo?`<img src="${p.photo}">`:`${BOOK_SVG}`}
+      </div>
+      <div class="wbody">
+        <div class="w-title">${esc(p.book.title)}</div>
+        <div class="w-memo">${esc(p.memo)}</div>
+        <div class="w-meta">
+          <span class="w-user">${esc(p.user.name)}</span>
+          <span class="w-likes">❤ ${p.likes||0}</span>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-// ─── MY POSTS ────────────────────────────────────────
+// ─── RANKING ─────────────────────────────────────────
+function renderRank() {
+  const all=allPosts().sort((a,b)=>(b.likes||0)-(a.likes||0));
+  const el=document.getElementById('rankList');
+  if(!all.length){ el.innerHTML=`<div class="empty"><h3>まだ投稿がありません</h3></div>`; return; }
+  el.innerHTML=all.map((p,i)=>{
+    const [g1,g2]=grad(p.book.title);
+    const nc=i===0?'n1':i===1?'n2':i===2?'n3':'';
+    const nl=String(i+1).padStart(2,'0');
+    return `<div class="rcard">
+      <div class="rnum ${nc}">${nl}</div>
+      <div class="rcov" style="background:linear-gradient(150deg,${g1},${g2})">
+        ${p.photo?`<img src="${p.photo}">`:`${BOOK_SVG}`}
+      </div>
+      <div class="rinfo">
+        <div class="r-title">${esc(p.book.title)}</div>
+        <div class="r-author">${esc(p.book.author||'')}</div>
+        <div class="r-memo">${esc(p.memo)}</div>
+        <div class="r-meta">
+          <span class="r-user">${esc(p.user.name)}</span>
+          <span class="r-likes">❤ ${p.likes||0}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── MY ──────────────────────────────────────────────
 function renderMy() {
-  const el = document.getElementById('myContent');
-  if (!userNotes.length) {
-    el.innerHTML=`<div class="empty"><div class="ei">📚</div><h3>まだ投稿がありません</h3><p>読んだ本の学びを投稿してみよう！</p></div>`;
+  const el=document.getElementById('myContent');
+  if(!userNotes.length){
+    el.innerHTML=`<div class="empty"><div class="empty-ico">${BOOK_SVG}</div><h3>まだ投稿がありません</h3><p>読んだ本の学びを投稿してみよう</p></div>`;
     return;
   }
   el.innerHTML=`<div class="mgrid">${userNotes.map(p=>{
     const [g1,g2]=grad(p.book.title);
     return `<div class="mcard" onclick="openDetail('${p.id}')">
-      ${p.photo
-        ? `<img class="mcov" src="${p.photo}">`
-        : `<div class="mcov" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
+      <div class="mcov" style="background:linear-gradient(150deg,${g1},${g2})">
+        ${p.photo?`<img src="${p.photo}">`:`${BOOK_SVG}`}
+      </div>
       <div class="mbody">
-        <div class="mbtitle">${esc(p.book.title)}</div>
-        <div class="mlikes">❤️ ${p.likes||0}</div>
+        <div class="m-title">${esc(p.book.title)}</div>
+        <div class="m-likes">❤ ${p.likes||0}</div>
       </div>
     </div>`;
   }).join('')}</div>`;
 }
 
 function openDetail(id) {
-  const p = userNotes.find(n=>n.id===id); if(!p) return;
+  const p=userNotes.find(n=>n.id===id); if(!p) return;
   const [g1,g2]=grad(p.book.title);
   document.getElementById('detBody').innerHTML=`
     ${p.photo
-      ? `<img class="dimg" src="${p.photo}">`
-      : `<div class="diph" style="background:linear-gradient(135deg,${g1},${g2})">📖</div>`}
-    <div class="dbtitle">『${esc(p.book.title)}』</div>
-    <div class="dbauthor">${esc(p.book.author||'')}</div>
-    <div class="dmemo">${esc(p.memo)}</div>
-    <div class="dbtns">
-      <button class="ddbtn" onclick="delNote('${id}')">🗑 削除</button>
-      <button class="dclbtn" onclick="closeDet()">閉じる</button>
+      ? `<img class="d-img" src="${p.photo}">`
+      : `<div class="d-iph" style="background:linear-gradient(150deg,${g1},${g2})">${BOOK_SVG}</div>`}
+    <div class="d-title">${esc(p.book.title)}</div>
+    <div class="d-author">${esc(p.book.author||'')}</div>
+    <div class="d-memo">${esc(p.memo)}</div>
+    <div class="d-btns">
+      <button class="d-del"   onclick="delNote('${id}')">削除</button>
+      <button class="d-close" onclick="closeDet()">閉じる</button>
     </div>`;
   document.getElementById('detMod').classList.remove('h');
 }
-
 function delNote(id) {
-  if (!confirm('削除しますか？')) return;
-  userNotes = userNotes.filter(n=>n.id!==id);
-  localStorage.setItem('bn_notes', JSON.stringify(userNotes));
-  closeDet(); renderMy(); toast('🗑 削除しました');
+  if(!confirm('削除しますか？')) return;
+  userNotes=userNotes.filter(n=>n.id!==id);
+  localStorage.setItem('bn_notes',JSON.stringify(userNotes));
+  closeDet(); renderMy(); toast('削除しました');
 }
-function closeDet() { document.getElementById('detMod').classList.add('h'); }
+function closeDet(){ document.getElementById('detMod').classList.add('h'); }
 
 // ─── POST MODAL ──────────────────────────────────────
 function openPost() {
   selTag=''; picData=null;
-  document.getElementById('fT').value='';
-  document.getElementById('fA').value='';
-  document.getElementById('fM').value='';
+  ['fT','fA','fM'].forEach(id=>document.getElementById(id).value='');
   const pa=document.getElementById('pArea');
-  pa.classList.remove('hp');
-  pa.innerHTML=`<div style="font-size:32px">📷</div><div class="parea-lbl">本の写真を追加（任意）</div>`;
+  pa.className='parea';
+  pa.innerHTML=`<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="parea-lbl">本の写真を追加（任意）</div>`;
   document.getElementById('tagRow').innerHTML=TAGS.map(t=>`<button class="tchip" onclick="pickTag('${t}',this)">${t}</button>`).join('');
   document.getElementById('postMod').classList.remove('h');
 }
-function closePost() { document.getElementById('postMod').classList.add('h'); }
+function closePost(){ document.getElementById('postMod').classList.add('h'); }
 
 function handlePic(input) {
-  if (!input.files?.[0]) return;
+  if(!input.files?.[0]) return;
   const r=new FileReader();
   r.onload=e=>{
     picData=e.target.result;
     const pa=document.getElementById('pArea');
-    pa.classList.add('hp');
+    pa.className='parea has-img';
     pa.innerHTML=`<img src="${picData}"><button class="premov" onclick="rmPic(event)">✕</button>`;
   };
   r.readAsDataURL(input.files[0]);
@@ -693,30 +958,29 @@ function handlePic(input) {
 function rmPic(e) {
   e.stopPropagation(); picData=null;
   const pa=document.getElementById('pArea');
-  pa.classList.remove('hp');
-  pa.innerHTML=`<div style="font-size:32px">📷</div><div class="parea-lbl">本の写真を追加（任意）</div>`;
+  pa.className='parea';
+  pa.innerHTML=`<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="parea-lbl">本の写真を追加（任意）</div>`;
 }
 function pickTag(t,el) {
   selTag=t;
   document.querySelectorAll('#tagRow .tchip').forEach(c=>c.classList.remove('on'));
   el.classList.add('on');
 }
-
 function submitPost() {
   const title=document.getElementById('fT').value.trim();
-  const memo=document.getElementById('fM').value.trim();
-  if (!title) { toast('📚 タイトルを入力してください'); return; }
-  if (!memo)  { toast('💭 学びを入力してください'); return; }
+  const memo =document.getElementById('fM').value.trim();
+  if(!title){ toast('タイトルを入力してください'); return; }
+  if(!memo) { toast('学びを入力してください'); return; }
   const note={
     id:'u'+Date.now(),
-    user:{name:'あなた',emoji:'🚀',bg:'#d8f3dc'},
+    user:{name:'You', ini:'Y', bg:'#1e3a5f'},
     book:{title, author:document.getElementById('fA').value.trim()},
     tag:selTag||'その他', photo:picData, memo,
     date:new Date().toISOString().split('T')[0], likes:0,
   };
   userNotes.unshift(note);
   localStorage.setItem('bn_notes',JSON.stringify(userNotes));
-  closePost(); toast('🎉 投稿しました！'); sw('Home');
+  closePost(); toast('投稿しました！'); sw('Home');
 }
 
 // ─── UTILS ───────────────────────────────────────────
@@ -728,7 +992,7 @@ function esc(s) {
 function toast(msg) {
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('on');
-  setTimeout(()=>t.classList.remove('on'),2400);
+  setTimeout(()=>t.classList.remove('on'),2200);
 }
 
 // ─── INIT ────────────────────────────────────────────
